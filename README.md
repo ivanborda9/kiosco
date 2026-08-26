@@ -71,6 +71,7 @@ para el panel (usuario/clave definidos en `.env`).
 | `DATABASE_URL` | Cadena de conexión de Postgres (`postgresql://usuario:password@host:5432/db`) |
 | `ADMIN_USERNAME` / `ADMIN_PASSWORD` | Credenciales del panel de admin |
 | `ADMIN_SESSION_SECRET` | Cadena secreta larga para firmar las sesiones (admin y revendedoras) |
+| `BLOB_READ_WRITE_TOKEN` | Token de [Vercel Blob](https://vercel.com/docs/storage/vercel-blob) para subir las fotos de productos |
 
 **Importante:** cambiá `ADMIN_PASSWORD` y `ADMIN_SESSION_SECRET` antes de
 publicar el sitio. El nombre de la tienda, el color, el banner y el número
@@ -79,9 +80,21 @@ de WhatsApp se configuran desde `/admin/configuracion`, no acá.
 ## Cargar tus propios productos
 
 Desde `/admin/productos` podés cargar cada producto con su nombre, precio,
-stock, categoría y una URL de imagen (podés subir tus fotos a cualquier
-servicio de hosting de imágenes y pegar el enlace ahí). Los productos de
-ejemplo usan íconos en `public/products/` que podés reemplazar.
+stock, categoría y una foto: el botón "Foto del producto" abre la galería
+del celular o el explorador de archivos de la compu y sube la imagen
+directamente (hasta 8 MB). Los productos de ejemplo usan íconos en
+`public/products/` que podés reemplazar.
+
+Las fotos se guardan en **Vercel Blob**:
+
+- **En Vercel:** desde el dashboard del proyecto andá a la pestaña
+  **Storage** → **Create Database** → **Blob**, conectala al proyecto y
+  Vercel carga automáticamente la variable `BLOB_READ_WRITE_TOKEN` — no
+  hace falta copiarla a mano. Redeployá después de conectarla.
+- **En local:** una vez creado el Blob Store en Vercel, andá a su pestaña
+  "Settings" → ".env.local" para copiar el token, o corré
+  `vercel env pull .env` si tenés el proyecto linkeado con la Vercel CLI, y
+  pegalo en `BLOB_READ_WRITE_TOKEN` dentro de tu `.env`.
 
 ## Cobrar con tarjeta / Mercado Pago
 

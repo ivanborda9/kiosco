@@ -1,3 +1,8 @@
+"use client";
+
+import Image from "next/image";
+import { useState } from "react";
+
 type ProductFormValues = {
   name: string;
   description: string;
@@ -16,6 +21,22 @@ export function ProductForm({
   initial?: ProductFormValues;
   submitLabel: string;
 }) {
+  const [preview, setPreview] = useState<string | null>(initial?.imageUrl ?? null);
+  const [removeImage, setRemoveImage] = useState(false);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setPreview(URL.createObjectURL(file));
+      setRemoveImage(false);
+    }
+  };
+
+  const handleRemove = () => {
+    setPreview(null);
+    setRemoveImage(true);
+  };
+
   return (
     <form action={action} className="flex max-w-xl flex-col gap-4">
       <div>
@@ -74,13 +95,30 @@ export function ProductForm({
         />
       </div>
       <div>
-        <label className="mb-1 block text-sm font-medium text-gray-700">URL de imagen</label>
+        <label className="mb-1 block text-sm font-medium text-gray-700">Foto del producto</label>
+        {preview && (
+          <div className="relative mb-2 h-40 w-32 overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
+            <Image src={preview} alt="Vista previa" fill className="object-cover" unoptimized />
+          </div>
+        )}
         <input
-          name="imageUrl"
-          placeholder="https://..."
-          defaultValue={initial?.imageUrl ?? ""}
-          className="w-full rounded-lg border border-gray-300 px-3 py-2"
+          name="image"
+          type="file"
+          accept="image/*"
+          onChange={handleFileChange}
+          className="block w-full text-sm text-gray-700 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-600 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-brand-700"
         />
+        {preview && (
+          <button
+            type="button"
+            onClick={handleRemove}
+            className="mt-2 text-sm font-medium text-red-600 hover:text-red-700"
+          >
+            Quitar imagen
+          </button>
+        )}
+        <input type="hidden" name="currentImageUrl" value={initial?.imageUrl ?? ""} />
+        <input type="hidden" name="removeImage" value={removeImage ? "true" : "false"} />
       </div>
       <button
         type="submit"
