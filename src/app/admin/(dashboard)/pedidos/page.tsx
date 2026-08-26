@@ -23,6 +23,7 @@ export default async function AdminOrdersPage() {
               <th className="px-4 py-3">Cliente</th>
               <th className="px-4 py-3">Revendedora</th>
               <th className="px-4 py-3">Total</th>
+              <th className="px-4 py-3">Pago</th>
               <th className="px-4 py-3">Estado</th>
               <th className="px-4 py-3">Fecha</th>
               <th className="px-4 py-3 text-right">Detalle</th>
@@ -35,6 +36,28 @@ export default async function AdminOrdersPage() {
                 <td className="px-4 py-3 font-medium text-gray-900">{o.customerName}</td>
                 <td className="px-4 py-3">{o.reseller?.code ?? "—"}</td>
                 <td className="px-4 py-3 font-semibold">{formatPrice(o.total)}</td>
+                <td className="px-4 py-3">
+                  {o.paymentMethod === "MERCADOPAGO" ? (
+                    <span
+                      className={
+                        o.paymentStatus === "APROBADO"
+                          ? "font-medium text-green-700"
+                          : o.paymentStatus === "RECHAZADO"
+                            ? "font-medium text-red-600"
+                            : "font-medium text-yellow-700"
+                      }
+                    >
+                      MP ·{" "}
+                      {o.paymentStatus === "APROBADO"
+                        ? "Aprobado"
+                        : o.paymentStatus === "RECHAZADO"
+                          ? "Rechazado"
+                          : "Pendiente"}
+                    </span>
+                  ) : (
+                    <span className="text-gray-500">WhatsApp</span>
+                  )}
+                </td>
                 <td className="px-4 py-3">
                   <StatusBadge status={o.status as OrderStatus} />
                 </td>

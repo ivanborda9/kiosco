@@ -63,6 +63,11 @@ model Order {
   status           String   @default("PENDIENTE")
   createdAt        DateTime @default(now())
 
+  paymentMethod    String   @default("WHATSAPP") // WHATSAPP | MERCADOPAGO
+  paymentStatus    String   @default("PENDIENTE") // PENDIENTE | APROBADO | RECHAZADO
+  mpPreferenceId   String?
+  mpPaymentId      String?
+
   items OrderItem[]
 }
 

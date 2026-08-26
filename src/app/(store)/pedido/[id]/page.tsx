@@ -4,19 +4,51 @@ import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/format";
 import { buildWhatsappOrderLink } from "@/lib/whatsapp";
 import { getSiteSettings } from "@/lib/settings";
+import { getMercadoPagoPayment, mapMercadoPagoStatus } from "@/lib/mercadopago";
+import { RetryPaymentButton } from "@/components/RetryPaymentButton";
 
 export const dynamic = "force-dynamic";
 
-export default async function OrderConfirmationPage({ params }: { params: { id: string } }) {
-  const [order, settings] = await Promise.all([
-    prisma.order.findUnique({
-      where: { id: params.id },
-      include: { items: true, reseller: true },
-    }),
-    getSiteSettings(),
-  ]);
+export default async function OrderConfirmationPage({
+  params,
+  searchParams,
+}: {
+  params: { id: string };
+  searchParams: { payment_id?: string };
+}) {
+  let order = await prisma.order.findUnique({
+    where: { id: params.id },
+    include: { items: true, reseller: true },
+  });
 
   if (!order) notFound();
+
+  // MP redirige acá antes de que llegue la notificación del webhook: si tenemos el
+  // payment_id, confirmamos el estado real contra la API de Mercado Pago al toque
+  // en vez de esperar. Nunca confiamos en el "status" que viene por la URL.
+  if (order.paymentMethod === "MERCADOPAGO" && order.paymentStatus === "PENDIENTE" && searchParams.payment_id) {
+    try {
+      const payment = await getMercadoPagoPayment(searchParams.payment_id);
+      if (payment.external_reference === order.id) {
+        const paymentStatus = mapMercadoPagoStatus(payment.status);
+        order = await prisma.order.update({
+          where: { id: order.id },
+          data: {
+            paymentStatus,
+            mpPaymentId: String(payment.id ?? ""),
+            ...(paymentStatus === "APROBADO" && order.status === "PENDIENTE"
+              ? { status: "CONFIRMADO" }
+              : {}),
+          },
+          include: { items: true, reseller: true },
+        });
+      }
+    } catch {
+      // Si falla, nos quedamos con el estado actual; el webhook lo va a actualizar después.
+    }
+  }
+
+  const settings = await getSiteSettings();
 
   const whatsappLink = buildWhatsappOrderLink({
     orderId: order.id,
@@ -27,15 +59,35 @@ export default async function OrderConfirmationPage({ params }: { params: { id: 
     whatsappNumber: settings.whatsappNumber,
   });
 
+  const isMercadoPago = order.paymentMethod === "MERCADOPAGO";
+  const header = isMercadoPago
+    ? {
+        APROBADO: { icon: "✓", color: "green", title: "¡Pago aprobado!" },
+        RECHAZADO: { icon: "✕", color: "red", title: "El pago fue rechazado" },
+        PENDIENTE: { icon: "…", color: "yellow", title: "Tu pago está siendo procesado" },
+      }[order.paymentStatus] ?? { icon: "✓", color: "green", title: "¡Gracias por tu pedido!" }
+    : { icon: "✓", color: "green", title: "¡Gracias por tu pedido!" };
+
+  const colorClasses: Record<string, string> = {
+    green: "bg-green-100 text-green-600",
+    red: "bg-red-100 text-red-600",
+    yellow: "bg-yellow-100 text-yellow-600",
+  };
+
   return (
     <div className="mx-auto max-w-xl py-10 text-center">
-      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-3xl text-green-600">
-        ✓
+      <div
+        className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full text-3xl ${colorClasses[header.color]}`}
+      >
+        {header.icon}
       </div>
-      <h1 className="text-2xl font-bold text-gray-900">¡Gracias por tu pedido!</h1>
+      <h1 className="text-2xl font-bold text-gray-900">{header.title}</h1>
       <p className="mt-2 text-gray-500">
-        Pedido #{order.id.slice(-6).toUpperCase()} recibido. Te contactaremos a la brevedad para
-        coordinar el pago y el envío.
+        {isMercadoPago && order.paymentStatus === "RECHAZADO"
+          ? `Pedido #${order.id.slice(-6).toUpperCase()}: el pago no se pudo procesar. Podés reintentar con otra tarjeta o coordinar por WhatsApp.`
+          : isMercadoPago && order.paymentStatus === "PENDIENTE"
+            ? `Pedido #${order.id.slice(-6).toUpperCase()} recibido. Te vamos a avisar apenas se confirme el pago.`
+            : `Pedido #${order.id.slice(-6).toUpperCase()} recibido. Te contactaremos a la brevedad para coordinar el envío.`}
       </p>
 
       <div className="mt-6 rounded-xl border border-gray-200 bg-white p-5 text-left">
@@ -65,7 +117,10 @@ export default async function OrderConfirmationPage({ params }: { params: { id: 
         </div>
       </div>
 
-      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
+      <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+        {isMercadoPago && order.paymentStatus === "RECHAZADO" && (
+          <RetryPaymentButton orderId={order.id} />
+        )}
         {settings.whatsappNumber && (
           <a
             href={whatsappLink}

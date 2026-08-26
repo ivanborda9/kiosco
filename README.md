@@ -17,8 +17,11 @@ por cada venta.
 - Catálogo con filtro por categoría
 - Ficha de producto con selector de cantidad
 - Carrito de compras (persistido en el navegador)
-- Checkout con datos de envío y campo para código de revendedora
-- Confirmación de pedido con botón para coordinar por WhatsApp
+- Checkout con datos de envío, campo para código de revendedora y elección
+  de medio de pago: **tarjeta/Mercado Pago** (si está configurado) o
+  **efectivo/transferencia** coordinando por WhatsApp
+- Confirmación de pedido que muestra el estado real del pago (aprobado,
+  pendiente, rechazado con botón para reintentar) o el botón de WhatsApp
 
 **Panel de administración** (`/admin`)
 - Resumen de ventas y comisiones generadas
@@ -80,13 +83,45 @@ stock, categoría y una URL de imagen (podés subir tus fotos a cualquier
 servicio de hosting de imágenes y pegar el enlace ahí). Los productos de
 ejemplo usan íconos en `public/products/` que podés reemplazar.
 
+## Cobrar con tarjeta / Mercado Pago
+
+El sitio usa **Checkout Pro** de Mercado Pago: la clienta paga en una
+pantalla de Mercado Pago (vos no manejás datos de tarjeta) y vuelve
+automáticamente al sitio con el resultado. Si no configurás estas
+variables, el checkout simplemente no muestra la opción y sigue
+funcionando solo con WhatsApp — no rompe nada.
+
+1. Entrá a [mercadopago.com.ar/developers/panel](https://www.mercadopago.com.ar/developers/panel)
+   con la cuenta de Mercado Pago del negocio (o creá una, es gratis).
+2. Creá una aplicación ("Tus integraciones" → "Crear aplicación").
+3. En "Credenciales de producción" copiá el **Access Token** (empieza con
+   `APP_USR-...`). Para probar sin cobrar de verdad primero, usá las
+   "Credenciales de prueba" (`TEST-...`) y las tarjetas de prueba que
+   Mercado Pago provee en su documentación.
+4. Cargá `MERCADOPAGO_ACCESS_TOKEN` con ese valor en Vercel (Settings →
+   Environment Variables) y redeployá.
+5. **Webhook (recomendado, opcional):** en la misma aplicación, sección
+   "Webhooks", agregá la URL `https://tu-sitio.vercel.app/api/mercadopago/webhook`
+   y copiá la "Clave secreta" que te da ahí. Cargala como
+   `MERCADOPAGO_WEBHOOK_SECRET` en Vercel. Sin esto, el sitio igual detecta
+   el pago apenas la clienta vuelve del checkout (por eso es opcional),
+   pero el webhook es una confirmación más confiable si la clienta cierra
+   la pestaña antes de volver.
+
+**Nota:** el stock se descuenta al crear el pedido, no al confirmarse el
+pago. Si una clienta abandona el pago con Mercado Pago sin completarlo, el
+stock queda reservado en ese pedido; revisalo de vez en cuando en
+`/admin/pedidos` (quedan como "Pendiente") y cancelalo manualmente si
+corresponde liberar el stock.
+
 ## Despliegue en producción (ej. Vercel)
 
 1. Creá una base de datos Postgres gratis en [Neon](https://neon.tech) o
    [Supabase](https://supabase.com) y copiá su cadena de conexión.
 2. En el proyecto de Vercel, cargá las variables de entorno: `DATABASE_URL`
    (la de Postgres), `ADMIN_USERNAME`, `ADMIN_PASSWORD` y
-   `ADMIN_SESSION_SECRET`.
+   `ADMIN_SESSION_SECRET` (`MERCADOPAGO_ACCESS_TOKEN` y
+   `MERCADOPAGO_WEBHOOK_SECRET` son opcionales, ver más abajo).
 3. Deployá. El comando `build` (`prisma generate && prisma db push && ...`)
    crea las tablas automáticamente en cada deploy, y el seed carga los
    productos de ejemplo solo si la base está vacía (no duplica datos en

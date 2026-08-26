@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { createOrderPreference, isMercadoPagoEnabled } from "@/lib/mercadopago";
 
 type CheckoutItem = { productId: string; quantity: number };
 
@@ -14,6 +15,7 @@ export async function POST(req: NextRequest) {
     typeof body?.resellerCode === "string" && body.resellerCode.trim()
       ? body.resellerCode.trim().toUpperCase()
       : null;
+  const paymentMethod = body?.paymentMethod === "MERCADOPAGO" ? "MERCADOPAGO" : "WHATSAPP";
   const items: CheckoutItem[] = Array.isArray(body?.items)
     ? body.items
         .filter((i: any) => typeof i?.productId === "string" && Number(i?.quantity) > 0)
@@ -28,6 +30,12 @@ export async function POST(req: NextRequest) {
   }
   if (items.length === 0) {
     return NextResponse.json({ error: "El carrito está vacío." }, { status: 400 });
+  }
+  if (paymentMethod === "MERCADOPAGO" && !isMercadoPagoEnabled()) {
+    return NextResponse.json(
+      { error: "El pago con Mercado Pago no está disponible en este momento." },
+      { status: 400 }
+    );
   }
 
   try {
@@ -75,6 +83,7 @@ export async function POST(req: NextRequest) {
           total,
           commissionAmount,
           resellerId: reseller?.id ?? null,
+          paymentMethod,
           items: { create: orderItemsData },
         },
         include: { items: true, reseller: true },
@@ -89,6 +98,24 @@ export async function POST(req: NextRequest) {
 
       return createdOrder;
     });
+
+    if (paymentMethod === "MERCADOPAGO") {
+      try {
+        const { preferenceId, checkoutUrl } = await createOrderPreference({
+          orderId: order.id,
+          title: `Pedido #${order.id.slice(-6).toUpperCase()}`,
+          total: order.total,
+          baseUrl: req.nextUrl.origin,
+        });
+        await prisma.order.update({ where: { id: order.id }, data: { mpPreferenceId: preferenceId } });
+        return NextResponse.json({ orderId: order.id, checkoutUrl });
+      } catch (mpError) {
+        console.error("Error creando la preferencia de Mercado Pago:", mpError);
+        // El pedido ya está creado y el stock reservado: dejamos que coordine el pago
+        // por WhatsApp en vez de perder la venta.
+        return NextResponse.json({ orderId: order.id });
+      }
+    }
 
     return NextResponse.json({ orderId: order.id });
   } catch (err) {

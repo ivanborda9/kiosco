@@ -40,6 +40,34 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
             <p className="text-sm text-gray-500">Venta directa, sin revendedora.</p>
           )}
         </div>
+        <div className="rounded-xl border border-gray-200 bg-white p-4 sm:col-span-2">
+          <h2 className="mb-2 font-semibold text-gray-900">Pago</h2>
+          <p className="text-sm text-gray-700">
+            Método:{" "}
+            {order.paymentMethod === "MERCADOPAGO" ? "Mercado Pago" : "Efectivo / transferencia (WhatsApp)"}
+          </p>
+          {order.paymentMethod === "MERCADOPAGO" && (
+            <p className="text-sm text-gray-700">
+              Estado del pago:{" "}
+              <span
+                className={
+                  order.paymentStatus === "APROBADO"
+                    ? "font-semibold text-green-700"
+                    : order.paymentStatus === "RECHAZADO"
+                      ? "font-semibold text-red-600"
+                      : "font-semibold text-yellow-700"
+                }
+              >
+                {order.paymentStatus === "APROBADO"
+                  ? "Aprobado"
+                  : order.paymentStatus === "RECHAZADO"
+                    ? "Rechazado"
+                    : "Pendiente"}
+              </span>
+              {order.mpPaymentId && ` · ID de pago: ${order.mpPaymentId}`}
+            </p>
+          )}
+        </div>
       </div>
 
       <div className="mb-6 rounded-xl border border-gray-200 bg-white p-4">
