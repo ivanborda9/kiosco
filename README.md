@@ -77,12 +77,13 @@ ejemplo usan íconos en `public/products/` que podés reemplazar.
    (la de Postgres), `ADMIN_USERNAME`, `ADMIN_PASSWORD`,
    `ADMIN_SESSION_SECRET`, `NEXT_PUBLIC_WHATSAPP_NUMBER` y
    `NEXT_PUBLIC_STORE_NAME`.
-3. Antes del primer deploy (o desde tu máquina), corré una vez
-   `DATABASE_URL="<tu cadena de Postgres>" npx prisma db push` para crear
-   las tablas, y opcionalmente `npm run db:seed` para cargar los productos
-   de ejemplo.
-4. Deployá. Vercel sirve el sitio por HTTPS automáticamente, que es
-   necesario porque la cookie de sesión del admin se marca `Secure`.
+3. Deployá. El comando `build` (`prisma generate && prisma db push && ...`)
+   crea las tablas automáticamente en cada deploy, y el seed carga los
+   productos de ejemplo solo si la base está vacía (no duplica datos en
+   redeploys posteriores) — no hace falta correr nada a mano.
+
+Vercel sirve el sitio por HTTPS automáticamente, que es necesario porque la
+cookie de sesión del admin se marca `Secure`.
 
 **Importante:** no uses SQLite en un hosting serverless (Vercel, Netlify,
 etc.) — su sistema de archivos es de solo lectura, así que la base de datos

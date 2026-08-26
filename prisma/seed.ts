@@ -105,6 +105,12 @@ const resellers = [
 ];
 
 async function main() {
+  const existingProducts = await prisma.product.count();
+  if (existingProducts > 0) {
+    console.log("Ya hay productos cargados, se omite el seed.");
+    return;
+  }
+
   for (const p of productos) {
     await prisma.product.create({ data: p });
   }
