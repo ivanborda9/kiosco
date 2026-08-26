@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="750" viewBox="0 0 600 750">
+  <rect width="600" height="750" fill="#f9d9ea"/>
+  <path d="M210 150 L260 100 L340 100 L390 150 L470 190 L440 300 L400 280 L400 620 L200 620 L200 280 L160 300 L130 190 Z" fill="#c2185b"/>
+  <rect x="285" y="150" width="30" height="380" fill="#f9d9ea"/>
+  <text x="300" y="690" font-family="Arial, sans-serif" font-size="28" fill="#831843" text-anchor="middle">Abrigos</text>
+</svg>

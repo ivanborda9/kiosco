@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="750" viewBox="0 0 600 750">
+  <rect width="600" height="750" fill="#fde0ef"/>
+  <path d="M250 110 L350 110 L370 260 L460 620 L140 620 L230 260 Z" fill="#ec4899"/>
+  <circle cx="300" cy="120" r="35" fill="#fbcfe8"/>
+  <text x="300" y="690" font-family="Arial, sans-serif" font-size="28" fill="#9d174d" text-anchor="middle">Vestidos</text>
+</svg>

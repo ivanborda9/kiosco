@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="750" viewBox="0 0 600 750">
+  <rect width="600" height="750" fill="#fbe4ee"/>
+  <ellipse cx="300" cy="380" rx="140" ry="110" fill="#db2777"/>
+  <ellipse cx="300" cy="380" rx="90" ry="70" fill="#fbe4ee"/>
+  <rect x="270" y="270" width="60" height="40" rx="8" fill="#db2777"/>
+  <text x="300" y="690" font-family="Arial, sans-serif" font-size="28" fill="#831843" text-anchor="middle">Accesorios</text>
+</svg>

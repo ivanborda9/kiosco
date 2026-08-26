@@ -1,0 +1,85 @@
+import Link from "next/link";
+import { prisma } from "@/lib/prisma";
+import { ProductCard } from "@/components/ProductCard";
+
+export const dynamic = "force-dynamic";
+
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: { categoria?: string };
+}) {
+  const categoria = searchParams.categoria;
+
+  const [products, categoriesRaw] = await Promise.all([
+    prisma.product.findMany({
+      where: { active: true, ...(categoria ? { category: categoria } : {}) },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.product.findMany({
+      where: { active: true },
+      select: { category: true },
+      distinct: ["category"],
+    }),
+  ]);
+
+  const categories = categoriesRaw.map((c) => c.category).sort();
+
+  return (
+    <div>
+      <section className="mb-8 rounded-2xl bg-gradient-to-r from-brand-500 to-brand-700 px-6 py-10 text-white">
+        <h1 className="text-3xl font-bold sm:text-4xl">Moda para vos y para revender</h1>
+        <p className="mt-2 max-w-xl text-brand-50">
+          Elegí tus prendas favoritas. ¿Sos revendedora? Ingresá tu código en el checkout y obtené tu
+          descuento.
+        </p>
+      </section>
+
+      <div className="mb-6 flex flex-wrap gap-2">
+        <Link
+          href="/"
+          className={`rounded-full border px-4 py-1.5 text-sm font-medium ${
+            !categoria
+              ? "border-brand-600 bg-brand-600 text-white"
+              : "border-brand-200 text-brand-700 hover:bg-brand-50"
+          }`}
+        >
+          Todas
+        </Link>
+        {categories.map((cat) => (
+          <Link
+            key={cat}
+            href={`/?categoria=${encodeURIComponent(cat)}`}
+            className={`rounded-full border px-4 py-1.5 text-sm font-medium ${
+              categoria === cat
+                ? "border-brand-600 bg-brand-600 text-white"
+                : "border-brand-200 text-brand-700 hover:bg-brand-50"
+            }`}
+          >
+            {cat}
+          </Link>
+        ))}
+      </div>
+
+      {products.length === 0 ? (
+        <p className="py-16 text-center text-gray-500">No hay productos en esta categoría todavía.</p>
+      ) : (
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          {products.map((p) => (
+            <ProductCard
+              key={p.id}
+              product={{
+                id: p.id,
+                name: p.name,
+                price: p.price,
+                imageUrl: p.imageUrl,
+                category: p.category,
+                stock: p.stock,
+              }}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
