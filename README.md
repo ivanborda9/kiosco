@@ -100,6 +100,16 @@ etc.) — su sistema de archivos es de solo lectura, así que la base de datos
 no puede crearse ni escribirse ahí y todas las páginas fallan con un error
 de servidor. Por eso este proyecto usa Postgres desde el principio.
 
+**Sobre `prisma db push --accept-data-loss` en el build:** como las tablas
+se sincronizan automáticamente en cada deploy (sin migraciones prolijas),
+Prisma a veces pide confirmar cambios que él clasifica como "riesgosos"
+(por ejemplo, agregar una restricción `unique` a una columna) aunque en la
+práctica no borren nada. Se usa esta bandera para que el deploy no se corte
+esperando una confirmación manual. Si en algún momento se agrega un cambio
+de esquema realmente destructivo (por ejemplo, borrar una columna con datos
+reales de clientas), conviene revisarlo a mano antes de deployar en lugar
+de confiar en el build automático.
+
 **Nota de seguridad:** el proyecto usa la última versión parcheada de la
 rama Next.js 14 (`14.2.35`). Una divulgación menor de endpoints internos
 de Server Actions ([GHSA-955p-x3mx-jcvp](https://github.com/advisories/GHSA-955p-x3mx-jcvp))
