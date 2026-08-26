@@ -23,10 +23,22 @@ por cada venta.
 **Panel de administración** (`/admin`)
 - Resumen de ventas y comisiones generadas
 - ABM de productos (nombre, precio, stock, categoría, imagen, alta/baja)
-- ABM de revendedoras: código de descuento, % de descuento para la clienta
-  y % de comisión para la revendedora
+- ABM de revendedoras: código de descuento, % de descuento para la clienta,
+  % de comisión y contraseña opcional para su panel
 - Listado de pedidos con detalle y cambio de estado (pendiente, confirmado,
   enviado, cancelado)
+- **Configuración** (`/admin/configuracion`): nombre de la tienda, color
+  principal del sitio, título/subtítulo/imagen del banner y número de
+  WhatsApp — todo editable sin tocar código ni redeployar
+
+**Panel de revendedoras** (`/revendedora`)
+- Página pública "¿Querés ser revendedora?" con botones para registrarse o
+  iniciar sesión
+- Registro con nombre, email, teléfono y contraseña: genera un código de
+  descuento único y queda **pendiente de aprobación** (el admin la activa
+  desde `/admin/revendedoras`)
+- Panel propio (`/revendedora/panel`) donde cada revendedora ve su código,
+  sus ventas y su comisión acumulada
 
 El descuento se calcula sobre el subtotal del pedido; la comisión de la
 revendedora se calcula sobre el total ya con el descuento aplicado.
@@ -55,12 +67,11 @@ para el panel (usuario/clave definidos en `.env`).
 |---|---|
 | `DATABASE_URL` | Cadena de conexión de Postgres (`postgresql://usuario:password@host:5432/db`) |
 | `ADMIN_USERNAME` / `ADMIN_PASSWORD` | Credenciales del panel de admin |
-| `ADMIN_SESSION_SECRET` | Cadena secreta larga para firmar la sesión |
-| `NEXT_PUBLIC_WHATSAPP_NUMBER` | Número de WhatsApp del negocio (formato internacional, sin `+`) |
-| `NEXT_PUBLIC_STORE_NAME` | Nombre del negocio mostrado en el sitio |
+| `ADMIN_SESSION_SECRET` | Cadena secreta larga para firmar las sesiones (admin y revendedoras) |
 
 **Importante:** cambiá `ADMIN_PASSWORD` y `ADMIN_SESSION_SECRET` antes de
-publicar el sitio.
+publicar el sitio. El nombre de la tienda, el color, el banner y el número
+de WhatsApp se configuran desde `/admin/configuracion`, no acá.
 
 ## Cargar tus propios productos
 
@@ -74,9 +85,8 @@ ejemplo usan íconos en `public/products/` que podés reemplazar.
 1. Creá una base de datos Postgres gratis en [Neon](https://neon.tech) o
    [Supabase](https://supabase.com) y copiá su cadena de conexión.
 2. En el proyecto de Vercel, cargá las variables de entorno: `DATABASE_URL`
-   (la de Postgres), `ADMIN_USERNAME`, `ADMIN_PASSWORD`,
-   `ADMIN_SESSION_SECRET`, `NEXT_PUBLIC_WHATSAPP_NUMBER` y
-   `NEXT_PUBLIC_STORE_NAME`.
+   (la de Postgres), `ADMIN_USERNAME`, `ADMIN_PASSWORD` y
+   `ADMIN_SESSION_SECRET`.
 3. Deployá. El comando `build` (`prisma generate && prisma db push && ...`)
    crea las tablas automáticamente en cada deploy, y el seed carga los
    productos de ejemplo solo si la base está vacía (no duplica datos en

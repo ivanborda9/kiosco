@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { ProductCard } from "@/components/ProductCard";
+import { getSiteSettings } from "@/lib/settings";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +12,7 @@ export default async function HomePage({
 }) {
   const categoria = searchParams.categoria;
 
-  const [products, categoriesRaw] = await Promise.all([
+  const [products, categoriesRaw, settings] = await Promise.all([
     prisma.product.findMany({
       where: { active: true, ...(categoria ? { category: categoria } : {}) },
       orderBy: { createdAt: "desc" },
@@ -21,18 +22,23 @@ export default async function HomePage({
       select: { category: true },
       distinct: ["category"],
     }),
+    getSiteSettings(),
   ]);
 
   const categories = categoriesRaw.map((c) => c.category).sort();
 
   return (
     <div>
-      <section className="mb-8 rounded-2xl bg-gradient-to-r from-brand-500 to-brand-700 px-6 py-10 text-white">
-        <h1 className="text-3xl font-bold sm:text-4xl">Moda para vos y para revender</h1>
-        <p className="mt-2 max-w-xl text-brand-50">
-          Elegí tus prendas favoritas. ¿Sos revendedora? Ingresá tu código en el checkout y obtené tu
-          descuento.
-        </p>
+      <section
+        className="mb-8 rounded-2xl bg-gradient-to-r from-brand-500 to-brand-700 bg-cover bg-center px-6 py-10 text-white"
+        style={
+          settings.bannerImageUrl
+            ? { backgroundImage: `linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url(${settings.bannerImageUrl})` }
+            : undefined
+        }
+      >
+        <h1 className="text-3xl font-bold sm:text-4xl">{settings.bannerTitle}</h1>
+        <p className="mt-2 max-w-xl text-brand-50">{settings.bannerSubtitle}</p>
       </section>
 
       <div className="mb-6 flex flex-wrap gap-2">

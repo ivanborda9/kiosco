@@ -4,8 +4,9 @@ export function buildWhatsappOrderLink(params: {
   items: { productName: string; quantity: number; price: number }[];
   total: number;
   resellerCode?: string | null;
+  whatsappNumber?: string | null;
 }): string {
-  const number = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
+  const number = params.whatsappNumber;
   const lines = [
     `Hola! Quiero coordinar el pago/envío de mi pedido #${params.orderId.slice(-6).toUpperCase()}.`,
     `Nombre: ${params.customerName}`,

@@ -3,9 +3,8 @@
 import Link from "next/link";
 import { useCart } from "./CartProvider";
 
-export function Navbar() {
+export function Navbar({ storeName }: { storeName: string }) {
   const { totalCount } = useCart();
-  const storeName = process.env.NEXT_PUBLIC_STORE_NAME || "Mi Catálogo";
 
   return (
     <header className="sticky top-0 z-40 border-b border-brand-100 bg-white/90 backdrop-blur">
@@ -16,6 +15,9 @@ export function Navbar() {
         <nav className="flex items-center gap-6 text-sm font-medium text-gray-700">
           <Link href="/" className="hover:text-brand-600">
             Catálogo
+          </Link>
+          <Link href="/revendedora" className="hover:text-brand-600">
+            Quiero ser revendedora
           </Link>
           <Link href="/carrito" className="relative flex items-center gap-1 hover:text-brand-600">
             <span>Carrito</span>

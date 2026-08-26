@@ -12,11 +12,13 @@ export function ResellerForm({
   initial,
   submitLabel,
   errorMessage,
+  hasPassword,
 }: {
   action: (formData: FormData) => void;
   initial?: ResellerFormValues;
   submitLabel: string;
   errorMessage?: string;
+  hasPassword?: boolean;
 }) {
   return (
     <form action={action} className="flex max-w-xl flex-col gap-4">
@@ -99,6 +101,22 @@ export function ResellerForm({
       <p className="text-xs text-gray-400">
         La comisión se calcula sobre el total de la venta ya con el descuento aplicado.
       </p>
+      <div>
+        <label className="mb-1 block text-sm font-medium text-gray-700">
+          {hasPassword ? "Nueva contraseña para su panel (opcional)" : "Contraseña para su panel (opcional)"}
+        </label>
+        <input
+          name="password"
+          type="password"
+          minLength={6}
+          placeholder={hasPassword ? "Dejar vacío para no cambiarla" : "Sin contraseña no puede loguearse"}
+          className="w-full rounded-lg border border-gray-300 px-3 py-2"
+        />
+        <p className="mt-1 text-xs text-gray-400">
+          Con email y esta contraseña, la revendedora puede entrar a /revendedora/login a ver sus
+          ventas y comisión.
+        </p>
+      </div>
       <button
         type="submit"
         className="mt-2 rounded-lg bg-brand-600 px-5 py-2.5 font-semibold text-white hover:bg-brand-700"

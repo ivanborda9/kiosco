@@ -3,14 +3,18 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/format";
 import { buildWhatsappOrderLink } from "@/lib/whatsapp";
+import { getSiteSettings } from "@/lib/settings";
 
 export const dynamic = "force-dynamic";
 
 export default async function OrderConfirmationPage({ params }: { params: { id: string } }) {
-  const order = await prisma.order.findUnique({
-    where: { id: params.id },
-    include: { items: true, reseller: true },
-  });
+  const [order, settings] = await Promise.all([
+    prisma.order.findUnique({
+      where: { id: params.id },
+      include: { items: true, reseller: true },
+    }),
+    getSiteSettings(),
+  ]);
 
   if (!order) notFound();
 
@@ -20,6 +24,7 @@ export default async function OrderConfirmationPage({ params }: { params: { id: 
     items: order.items,
     total: order.total,
     resellerCode: order.reseller?.code,
+    whatsappNumber: settings.whatsappNumber,
   });
 
   return (
@@ -61,14 +66,16 @@ export default async function OrderConfirmationPage({ params }: { params: { id: 
       </div>
 
       <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
-        <a
-          href={whatsappLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="rounded-lg bg-green-600 px-5 py-2.5 font-semibold text-white hover:bg-green-700"
-        >
-          Coordinar por WhatsApp
-        </a>
+        {settings.whatsappNumber && (
+          <a
+            href={whatsappLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-lg bg-green-600 px-5 py-2.5 font-semibold text-white hover:bg-green-700"
+          >
+            Coordinar por WhatsApp
+          </a>
+        )}
         <Link
           href="/"
           className="rounded-lg border border-brand-600 px-5 py-2.5 font-semibold text-brand-700 hover:bg-brand-50"

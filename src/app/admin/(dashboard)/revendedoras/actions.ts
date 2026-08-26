@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { hashPassword } from "@/lib/password";
 
 function parseResellerForm(formData: FormData) {
   return {
@@ -14,24 +15,27 @@ function parseResellerForm(formData: FormData) {
       .toUpperCase(),
     discountPercent: Number(formData.get("discountPercent") || 0),
     commissionPercent: Number(formData.get("commissionPercent") || 0),
+    password: String(formData.get("password") || ""),
   };
 }
 
 export async function createReseller(formData: FormData) {
-  const data = parseResellerForm(formData);
+  const { password, ...data } = parseResellerForm(formData);
   if (!data.code) {
     redirect("/admin/revendedoras/nueva?error=El código es obligatorio.");
   }
 
   let failed = false;
   try {
-    await prisma.reseller.create({ data });
+    await prisma.reseller.create({
+      data: { ...data, passwordHash: password ? await hashPassword(password) : null },
+    });
   } catch {
     failed = true;
   }
 
   if (failed) {
-    redirect(`/admin/revendedoras/nueva?error=El código "${data.code}" ya está en uso.`);
+    redirect(`/admin/revendedoras/nueva?error=El código o el email ya está en uso.`);
   }
 
   revalidatePath("/admin/revendedoras");
@@ -39,8 +43,11 @@ export async function createReseller(formData: FormData) {
 }
 
 export async function updateReseller(id: string, formData: FormData) {
-  const data = parseResellerForm(formData);
-  await prisma.reseller.update({ where: { id }, data });
+  const { password, ...data } = parseResellerForm(formData);
+  await prisma.reseller.update({
+    where: { id },
+    data: { ...data, ...(password ? { passwordHash: await hashPassword(password) } : {}) },
+  });
   revalidatePath("/admin/revendedoras");
   redirect("/admin/revendedoras");
 }

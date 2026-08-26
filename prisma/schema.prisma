@@ -25,15 +25,27 @@ model Product {
 model Reseller {
   id                String   @id @default(cuid())
   name              String
-  email             String?
+  email             String?  @unique
   phone             String?
   code              String   @unique
+  passwordHash      String?
   discountPercent   Float    @default(10)
   commissionPercent Float    @default(15)
   active            Boolean  @default(true)
   createdAt         DateTime @default(now())
 
   orders Order[]
+}
+
+model SiteSettings {
+  id             String   @id @default("singleton")
+  storeName      String   @default("Mi Catálogo")
+  primaryColor   String   @default("#db2777")
+  bannerTitle    String   @default("Moda para vos y para revender")
+  bannerSubtitle String   @default("Elegí tus prendas favoritas. ¿Sos revendedora? Ingresá tu código en el checkout y obtené tu descuento.")
+  bannerImageUrl String?
+  whatsappNumber String   @default("")
+  updatedAt      DateTime @updatedAt
 }
 
 model Order {

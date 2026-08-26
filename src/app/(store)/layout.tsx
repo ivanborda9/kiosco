@@ -1,13 +1,16 @@
 import { CartProvider } from "@/components/CartProvider";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { getSiteSettings } from "@/lib/settings";
 
-export default function StoreLayout({ children }: { children: React.ReactNode }) {
+export default async function StoreLayout({ children }: { children: React.ReactNode }) {
+  const settings = await getSiteSettings();
+
   return (
     <CartProvider>
-      <Navbar />
+      <Navbar storeName={settings.storeName} />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">{children}</main>
-      <Footer />
+      <Footer storeName={settings.storeName} />
     </CartProvider>
   );
 }

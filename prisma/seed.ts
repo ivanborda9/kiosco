@@ -1,6 +1,8 @@
 import { PrismaClient } from "@prisma/client";
+import { hashPassword } from "../src/lib/password";
 
 const prisma = new PrismaClient();
+const DEMO_RESELLER_PASSWORD = "revendedora123";
 
 const productos = [
   {
@@ -105,6 +107,14 @@ const resellers = [
 ];
 
 async function main() {
+  // Se crea antes que nada y de forma idempotente para evitar que varias páginas
+  // generadas en paralelo durante "next build" compitan por crear la misma fila.
+  await prisma.siteSettings.upsert({
+    where: { id: "singleton" },
+    update: {},
+    create: { id: "singleton" },
+  });
+
   const existingProducts = await prisma.product.count();
   if (existingProducts > 0) {
     console.log("Ya hay productos cargados, se omite el seed.");
@@ -114,10 +124,13 @@ async function main() {
   for (const p of productos) {
     await prisma.product.create({ data: p });
   }
+  const passwordHash = await hashPassword(DEMO_RESELLER_PASSWORD);
   for (const r of resellers) {
-    await prisma.reseller.create({ data: r });
+    await prisma.reseller.create({ data: { ...r, passwordHash } });
   }
-  console.log(`Seed completo: ${productos.length} productos, ${resellers.length} revendedoras.`);
+  console.log(
+    `Seed completo: ${productos.length} productos, ${resellers.length} revendedoras (contraseña de prueba: "${DEMO_RESELLER_PASSWORD}").`
+  );
 }
 
 main()

@@ -2,6 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* Valores por defecto; se sobreescriben en tiempo real desde /admin/configuracion */
+  --brand-50: 253 242 248;
+  --brand-100: 252 231 243;
+  --brand-400: 244 114 182;
+  --brand-500: 236 72 153;
+  --brand-600: 219 39 119;
+  --brand-700: 190 24 93;
+  --brand-900: 131 24 67;
+}
+
 html,
 body {
   height: 100%;
