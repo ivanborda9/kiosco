@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="750" viewBox="0 0 600 750">
+  <rect width="600" height="750" fill="#fbe4ee"/>
+  <path d="M230 120 L270 100 L300 120 L330 100 L370 120 L400 160 L370 200 L350 185 L350 480 L250 480 L250 185 L230 200 L200 160 Z" fill="#831843"/>
+  <path d="M300 120 L285 150 L300 175 L315 150 Z" fill="#fbe4ee"/>
+  <text x="300" y="690" font-family="Arial, sans-serif" font-size="28" fill="#831843" text-anchor="middle">Hombre</text>
+</svg>

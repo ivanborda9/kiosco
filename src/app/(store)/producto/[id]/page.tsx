@@ -1,8 +1,8 @@
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/format";
 import { ProductDetailActions } from "@/components/ProductDetailActions";
+import { ProductImage } from "@/components/ProductImage";
 
 export const dynamic = "force-dynamic";
 
@@ -16,11 +16,14 @@ export default async function ProductPage({ params }: { params: { id: string } }
   return (
     <div className="grid gap-8 md:grid-cols-2">
       <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-brand-50">
-        {product.imageUrl ? (
-          <Image src={product.imageUrl} alt={product.name} fill className="object-cover" priority />
-        ) : (
-          <div className="flex h-full items-center justify-center text-brand-300">Sin imagen</div>
-        )}
+        <ProductImage
+          src={product.imageUrl}
+          alt={product.name}
+          category={product.category}
+          fill
+          className="object-cover"
+          priority
+        />
       </div>
       <div>
         <span className="text-xs uppercase tracking-wide text-brand-500">{product.category}</span>

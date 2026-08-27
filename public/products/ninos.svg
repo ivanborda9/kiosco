@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="750" viewBox="0 0 600 750">
+  <rect width="600" height="750" fill="#fce7f3"/>
+  <path d="M240 130 L270 100 L330 100 L360 130 L410 155 L385 210 L360 195 L360 480 L240 480 L240 195 L215 210 L190 155 Z" fill="#ec4899"/>
+  <circle cx="270" cy="330" r="14" fill="#fce7f3"/>
+  <circle cx="330" cy="330" r="14" fill="#fce7f3"/>
+  <text x="300" y="690" font-family="Arial, sans-serif" font-size="28" fill="#9d174d" text-anchor="middle">Niños</text>
+</svg>

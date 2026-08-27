@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { useCart } from "./CartProvider";
+import { ProductImage } from "./ProductImage";
 import { formatPrice } from "@/lib/format";
 
 export type ProductCardData = {
@@ -35,17 +35,14 @@ export function ProductCard({ product }: { product: ProductCardData }) {
   return (
     <div className="group flex flex-col overflow-hidden rounded-xl border border-brand-100 bg-white shadow-sm transition hover:shadow-md">
       <Link href={`/producto/${product.id}`} className="relative block aspect-[4/5] w-full bg-brand-50">
-        {product.imageUrl ? (
-          <Image
-            src={product.imageUrl}
-            alt={product.name}
-            fill
-            className="object-cover transition group-hover:scale-105"
-            sizes="(max-width: 768px) 50vw, 25vw"
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center text-brand-300">Sin imagen</div>
-        )}
+        <ProductImage
+          src={product.imageUrl}
+          alt={product.name}
+          category={product.category}
+          fill
+          className="object-cover transition group-hover:scale-105"
+          sizes="(max-width: 768px) 50vw, 25vw"
+        />
         {outOfStock && (
           <span className="absolute right-2 top-2 rounded bg-gray-900/80 px-2 py-1 text-xs font-semibold text-white">
             Sin stock
