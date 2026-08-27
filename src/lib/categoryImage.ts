@@ -1,17 +1,21 @@
 const CATEGORY_FALLBACKS: Record<string, string> = {
-  "Remeras y Tops": "/products/remeras.svg",
-  "Pantalones y Calzas": "/products/pantalones.svg",
-  "Vestidos y Polleras": "/products/vestidos.svg",
-  "Buzos y Camperas": "/products/abrigos.svg",
-  "Blazers y Sacos": "/products/abrigos.svg",
-  Accesorios: "/products/accesorios.svg",
-  Niños: "/products/ninos.svg",
-  Hombre: "/products/hombre.svg",
-  // Categorías del catálogo original
   Remeras: "/products/remeras.svg",
+  Blusas: "/products/remeras.svg",
+  Jeans: "/products/pantalones.svg",
   Pantalones: "/products/pantalones.svg",
+  Buzos: "/products/abrigos.svg",
+  Camperas: "/products/abrigos.svg",
+  Medias: "/products/medias.svg",
+  Cintos: "/products/accesorios.svg",
+  Mochilas: "/products/accesorios.svg",
+  Accesorios: "/products/accesorios.svg",
+  Perfumes: "/products/perfumes.svg",
+  "Ropa interior": "/products/ropainterior.svg",
+  Pijamas: "/products/pijamas.svg",
   Vestidos: "/products/vestidos.svg",
   Abrigos: "/products/abrigos.svg",
+  Niños: "/products/ninos.svg",
+  Hombre: "/products/hombre.svg",
 };
 
 export function getCategoryFallbackImage(category: string): string {
