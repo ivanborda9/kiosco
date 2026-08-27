@@ -627,6 +627,11 @@ async function main() {
     update: {},
     create: { id: "singleton" },
   });
+  await prisma.canchaConfig.upsert({
+    where: { id: "singleton" },
+    update: {},
+    create: { id: "singleton" },
+  });
 
   // Reemplazo total del catálogo: se quita todo lo que no esté en la lista nueva.
   // Si un producto viejo tiene pedidos asociados no se puede borrar (por la

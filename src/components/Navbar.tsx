@@ -19,6 +19,9 @@ export function Navbar({ storeName }: { storeName: string }) {
           <Link href="/revendedora" className="hover:text-brand-600">
             Quiero ser revendedora
           </Link>
+          <Link href="/cancha" className="hover:text-brand-600">
+            Reservar cancha
+          </Link>
           <Link href="/carrito" className="relative flex items-center gap-1 hover:text-brand-600">
             <span>Carrito</span>
             {totalCount > 0 && (

@@ -8,6 +8,9 @@ export function Footer({ storeName }: { storeName: string }) {
         <a href="/revendedora" className="hover:text-brand-600">
           ¿Querés ser revendedora?
         </a>
+        <a href="/cancha" className="hover:text-brand-600">
+          Reservar cancha
+        </a>
         <a href="/admin" className="hover:text-brand-600">
           Acceso administrador
         </a>

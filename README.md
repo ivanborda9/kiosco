@@ -46,6 +46,20 @@ por cada venta.
 El descuento se calcula sobre el subtotal del pedido; la comisión de la
 revendedora se calcula sobre el total ya con el descuento aplicado.
 
+**Reserva de cancha de fútbol** (`/cancha`)
+- Calendario mensual con los turnos disponibles según el horario y la
+  duración configurados; no hace falta registrarse
+- El cliente elige día y horario, ingresa nombre y celular y paga la **seña**
+  con Mercado Pago para confirmar el turno al instante
+- Un turno con seña pendiente reserva el horario por 15 minutos; si no se
+  completa el pago en ese tiempo, el turno se libera solo para otro cliente
+- Confirmación con el estado del pago (aprobado, pendiente, rechazado con
+  botón para reintentar)
+- **Panel admin** (`/admin/cancha`): nombre de la cancha, precio del turno,
+  monto de la seña, horario de apertura/cierre, duración del turno, días
+  cerrados y número de WhatsApp de contacto, además del listado de reservas
+  con posibilidad de cancelarlas o confirmarlas manualmente
+
 ## Cómo correrlo localmente
 
 Necesitás una base de datos Postgres. La forma más rápida es crear una

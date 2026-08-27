@@ -81,3 +81,34 @@ model OrderItem {
   price       Float
   quantity    Int
 }
+
+model CanchaConfig {
+  id              String   @id @default("singleton")
+  courtName       String   @default("Cancha de Fútbol 7")
+  slotDurationMin Int      @default(60)
+  openTime        String   @default("09:00")
+  closeTime       String   @default("23:00")
+  closedWeekdays  String   @default("")
+  pricePerSlot    Float    @default(20000)
+  depositAmount   Float    @default(5000)
+  whatsappNumber  String   @default("")
+  updatedAt       DateTime @updatedAt
+}
+
+model Booking {
+  id             String   @id @default(cuid())
+  date           String // "YYYY-MM-DD"
+  startTime      String // "HH:mm"
+  endTime        String // "HH:mm"
+  customerName   String
+  customerPhone  String
+  price          Float
+  depositAmount  Float
+  status         String   @default("PENDIENTE") // PENDIENTE | CONFIRMADO | CANCELADO
+  paymentStatus  String   @default("PENDIENTE") // PENDIENTE | APROBADO | RECHAZADO
+  mpPreferenceId String?
+  mpPaymentId    String?
+  createdAt      DateTime @default(now())
+
+  @@unique([date, startTime])
+}

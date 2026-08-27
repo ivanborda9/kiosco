@@ -13,10 +13,12 @@ function getClient(): MercadoPagoConfig {
   return new MercadoPagoConfig({ accessToken });
 }
 
-export async function createOrderPreference(params: {
-  orderId: string;
+async function createPreference(params: {
+  externalReference: string;
   title: string;
-  total: number;
+  amount: number;
+  successPath: string;
+  notificationPath: string;
   baseUrl: string;
 }): Promise<{ preferenceId: string; checkoutUrl: string }> {
   const preference = new Preference(getClient());
@@ -26,21 +28,21 @@ export async function createOrderPreference(params: {
     body: {
       items: [
         {
-          id: params.orderId,
+          id: params.externalReference,
           title: params.title,
           quantity: 1,
           currency_id: "ARS",
-          unit_price: params.total,
+          unit_price: params.amount,
         },
       ],
-      external_reference: params.orderId,
+      external_reference: params.externalReference,
       back_urls: {
-        success: `${params.baseUrl}/pedido/${params.orderId}`,
-        pending: `${params.baseUrl}/pedido/${params.orderId}`,
-        failure: `${params.baseUrl}/pedido/${params.orderId}`,
+        success: `${params.baseUrl}${params.successPath}`,
+        pending: `${params.baseUrl}${params.successPath}`,
+        failure: `${params.baseUrl}${params.successPath}`,
       },
       auto_return: "approved",
-      notification_url: `${params.baseUrl}/api/mercadopago/webhook`,
+      notification_url: `${params.baseUrl}${params.notificationPath}`,
     },
   });
 
@@ -51,6 +53,38 @@ export async function createOrderPreference(params: {
   }
 
   return { preferenceId: response.id, checkoutUrl };
+}
+
+export async function createOrderPreference(params: {
+  orderId: string;
+  title: string;
+  total: number;
+  baseUrl: string;
+}): Promise<{ preferenceId: string; checkoutUrl: string }> {
+  return createPreference({
+    externalReference: params.orderId,
+    title: params.title,
+    amount: params.total,
+    successPath: `/pedido/${params.orderId}`,
+    notificationPath: "/api/mercadopago/webhook",
+    baseUrl: params.baseUrl,
+  });
+}
+
+export async function createBookingPreference(params: {
+  bookingId: string;
+  title: string;
+  depositAmount: number;
+  baseUrl: string;
+}): Promise<{ preferenceId: string; checkoutUrl: string }> {
+  return createPreference({
+    externalReference: params.bookingId,
+    title: params.title,
+    amount: params.depositAmount,
+    successPath: `/cancha/reserva/${params.bookingId}`,
+    notificationPath: "/api/mercadopago/cancha-webhook",
+    baseUrl: params.baseUrl,
+  });
 }
 
 export async function getMercadoPagoPayment(paymentId: string) {
