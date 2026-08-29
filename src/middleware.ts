@@ -9,6 +9,12 @@ import {
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
+  // Despliegues dedicados a la cancha (SITE_MODE=cancha en las variables de entorno)
+  // usan /cancha como portada en vez del catálogo de ropa.
+  if (pathname === "/" && process.env.SITE_MODE === "cancha") {
+    return NextResponse.redirect(new URL("/cancha", req.url));
+  }
+
   if (pathname.startsWith("/admin")) {
     if (pathname === "/admin/login") {
       return NextResponse.next();
@@ -39,5 +45,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/revendedora/panel/:path*"],
+  matcher: ["/", "/admin/:path*", "/revendedora/panel/:path*"],
 };
