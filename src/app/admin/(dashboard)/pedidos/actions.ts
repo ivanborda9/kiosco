@@ -36,3 +36,11 @@ export async function updateOrderStatus(id: string, formData: FormData) {
   revalidatePath(`/admin/pedidos/${id}`);
   revalidatePath("/admin");
 }
+
+export async function deleteCancelledOrder(id: string) {
+  // Por seguridad, solo se puede borrar un pedido que ya esté cancelado
+  // (el stock ya se liberó al cancelarlo, así que no hay nada más que revertir).
+  await prisma.order.deleteMany({ where: { id, status: "CANCELADO" } });
+  revalidatePath("/admin/pedidos");
+  revalidatePath("/admin");
+}

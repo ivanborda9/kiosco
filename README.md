@@ -29,7 +29,9 @@ por cada venta.
 - ABM de revendedoras: código de descuento, % de descuento para la clienta,
   % de comisión y contraseña opcional para su panel
 - Listado de pedidos con detalle y cambio de estado (pendiente, confirmado,
-  enviado, cancelado)
+  enviado, cancelado); los pedidos cancelados se pueden eliminar de la lista
+- **Banners** (`/admin/banners`): carrusel de banners para la home, subiendo
+  las imágenes desde archivos (requiere Vercel Blob, ver más abajo)
 - **Configuración** (`/admin/configuracion`): nombre de la tienda, color
   principal del sitio, título/subtítulo/imagen del banner y número de
   WhatsApp — todo editable sin tocar código ni redeployar
@@ -79,9 +81,29 @@ de WhatsApp se configuran desde `/admin/configuracion`, no acá.
 ## Cargar tus propios productos
 
 Desde `/admin/productos` podés cargar cada producto con su nombre, precio,
-stock, categoría y una URL de imagen (podés subir tus fotos a cualquier
-servicio de hosting de imágenes y pegar el enlace ahí). Los productos de
-ejemplo usan íconos en `public/products/` que podés reemplazar.
+stock, categoría e imagen. La imagen se puede cargar de dos formas: pegando
+una URL, o subiendo el archivo directamente desde tu computadora (esto
+último requiere conectar Vercel Blob Storage, ver la sección siguiente).
+También podés agregar varias fotos adicionales por producto, que se
+muestran como galería en la ficha del producto. Los productos de ejemplo
+usan íconos en `public/products/` como respaldo cuando una foto no carga.
+
+## Subir fotos y banners desde archivos (Vercel Blob Storage)
+
+Para poder subir fotos de productos y banners desde tu computadora (en vez
+de pegar una URL), necesitás conectar **Vercel Blob Storage** a tu
+proyecto — es un servicio de almacenamiento de archivos de Vercel, con un
+plan gratuito que alcanza de sobra para un catálogo. Sin esto, el sitio
+sigue funcionando normalmente, pero el panel solo permite cargar imágenes
+por URL y `/admin/banners` queda deshabilitado para subir banners nuevos.
+
+1. En tu proyecto en Vercel, andá a la pestaña **Storage** → **Create
+   Database** → elegí **Blob**.
+2. Seguí los pasos para crear el store y conectarlo a tu proyecto. Vercel
+   agrega automáticamente la variable `BLOB_READ_WRITE_TOKEN` — no hace
+   falta copiarla a mano.
+3. Redeployá el proyecto (o esperá al próximo deploy) para que la variable
+   quede disponible.
 
 ## Cobrar con tarjeta / Mercado Pago
 
@@ -120,8 +142,9 @@ corresponde liberar el stock.
    [Supabase](https://supabase.com) y copiá su cadena de conexión.
 2. En el proyecto de Vercel, cargá las variables de entorno: `DATABASE_URL`
    (la de Postgres), `ADMIN_USERNAME`, `ADMIN_PASSWORD` y
-   `ADMIN_SESSION_SECRET` (`MERCADOPAGO_ACCESS_TOKEN` y
-   `MERCADOPAGO_WEBHOOK_SECRET` son opcionales, ver más abajo).
+   `ADMIN_SESSION_SECRET` (`MERCADOPAGO_ACCESS_TOKEN`,
+   `MERCADOPAGO_WEBHOOK_SECRET` y `BLOB_READ_WRITE_TOKEN` son opcionales,
+   ver más abajo).
 3. Deployá. El comando `build` (`prisma generate && prisma db push && ...`)
    crea las tablas automáticamente en cada deploy, y el seed carga los
    productos de ejemplo solo si la base está vacía (no duplica datos en

@@ -1,10 +1,14 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { ProductForm } from "@/components/admin/ProductForm";
+import { isBlobConfigured } from "@/lib/blob";
 import { updateProduct } from "../../actions";
 
 export default async function EditProductPage({ params }: { params: { id: string } }) {
-  const product = await prisma.product.findUnique({ where: { id: params.id } });
+  const product = await prisma.product.findUnique({
+    where: { id: params.id },
+    include: { images: { orderBy: { position: "asc" } } },
+  });
   if (!product) notFound();
 
   return (
@@ -21,6 +25,8 @@ export default async function EditProductPage({ params }: { params: { id: string
           imageUrl: product.imageUrl,
         }}
         submitLabel="Guardar cambios"
+        blobEnabled={isBlobConfigured()}
+        existingImages={product.images.map((img) => ({ id: img.id, url: img.url }))}
       />
     </div>
   );

@@ -2,6 +2,8 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { formatPrice, formatDate, OrderStatus } from "@/lib/format";
 import { StatusBadge } from "@/components/admin/StatusBadge";
+import { ConfirmSubmitButton } from "@/components/admin/ConfirmSubmitButton";
+import { deleteCancelledOrder } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -63,9 +65,21 @@ export default async function AdminOrdersPage() {
                 </td>
                 <td className="px-4 py-3 text-gray-500">{formatDate(o.createdAt)}</td>
                 <td className="px-4 py-3 text-right">
-                  <Link href={`/admin/pedidos/${o.id}`} className="text-brand-600 hover:underline">
-                    Ver
-                  </Link>
+                  <div className="flex justify-end gap-3">
+                    <Link href={`/admin/pedidos/${o.id}`} className="text-brand-600 hover:underline">
+                      Ver
+                    </Link>
+                    {o.status === "CANCELADO" && (
+                      <form action={deleteCancelledOrder.bind(null, o.id)}>
+                        <ConfirmSubmitButton
+                          confirmMessage="¿Eliminar este pedido cancelado? Esta acción no se puede deshacer."
+                          className="text-red-500 hover:underline"
+                        >
+                          Eliminar
+                        </ConfirmSubmitButton>
+                      </form>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}

@@ -2,29 +2,28 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/format";
 import { ProductDetailActions } from "@/components/ProductDetailActions";
-import { ProductImage } from "@/components/ProductImage";
+import { ProductGallery } from "@/components/ProductGallery";
 
 export const dynamic = "force-dynamic";
 
 export default async function ProductPage({ params }: { params: { id: string } }) {
-  const product = await prisma.product.findUnique({ where: { id: params.id } });
+  const product = await prisma.product.findUnique({
+    where: { id: params.id },
+    include: { images: { orderBy: { position: "asc" } } },
+  });
 
   if (!product || !product.active) {
     notFound();
   }
 
+  const galleryImages = [
+    ...(product.imageUrl ? [product.imageUrl] : []),
+    ...product.images.map((img) => img.url),
+  ];
+
   return (
     <div className="grid gap-8 md:grid-cols-2">
-      <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-brand-50">
-        <ProductImage
-          src={product.imageUrl}
-          alt={product.name}
-          category={product.category}
-          fill
-          className="object-cover"
-          priority
-        />
-      </div>
+      <ProductGallery images={galleryImages} alt={product.name} category={product.category} />
       <div>
         <span className="text-xs uppercase tracking-wide text-brand-500">{product.category}</span>
         <h1 className="mt-1 text-2xl font-bold text-gray-900">{product.name}</h1>
