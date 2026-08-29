@@ -4,11 +4,16 @@ import { ProductForm } from "@/components/admin/ProductForm";
 import { isBlobConfigured } from "@/lib/blob";
 import { updateProduct } from "../../actions";
 
+export const dynamic = "force-dynamic";
+
 export default async function EditProductPage({ params }: { params: { id: string } }) {
-  const product = await prisma.product.findUnique({
-    where: { id: params.id },
-    include: { images: { orderBy: { position: "asc" } } },
-  });
+  const [product, categories] = await Promise.all([
+    prisma.product.findUnique({
+      where: { id: params.id },
+      include: { images: { orderBy: { position: "asc" } } },
+    }),
+    prisma.category.findMany({ orderBy: { position: "asc" } }),
+  ]);
   if (!product) notFound();
 
   return (
@@ -27,6 +32,7 @@ export default async function EditProductPage({ params }: { params: { id: string
         submitLabel="Guardar cambios"
         blobEnabled={isBlobConfigured()}
         existingImages={product.images.map((img) => ({ id: img.id, url: img.url }))}
+        categories={categories.map((c) => c.name)}
       />
     </div>
   );

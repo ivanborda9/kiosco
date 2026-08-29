@@ -4,6 +4,7 @@ import { logoutAction } from "../login/actions";
 const links = [
   { href: "/admin", label: "Resumen" },
   { href: "/admin/productos", label: "Productos" },
+  { href: "/admin/categorias", label: "Categorías" },
   { href: "/admin/revendedoras", label: "Revendedoras" },
   { href: "/admin/pedidos", label: "Pedidos" },
   { href: "/admin/banners", label: "Banners" },

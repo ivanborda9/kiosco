@@ -26,6 +26,9 @@ por cada venta.
 **Panel de administración** (`/admin`)
 - Resumen de ventas y comisiones generadas
 - ABM de productos (nombre, precio, stock, categoría, imagen, alta/baja)
+- **Categorías** (`/admin/categorias`): crear o eliminar las categorías que después
+  se eligen al cargar un producto y que aparecen como filtro en el catálogo. No
+  se puede eliminar una categoría que todavía tiene productos cargados.
 - ABM de revendedoras: código de descuento, % de descuento para la clienta,
   % de comisión y contraseña opcional para su panel
 - Listado de pedidos con detalle y cambio de estado (pendiente, confirmado,

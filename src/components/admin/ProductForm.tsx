@@ -15,13 +15,19 @@ export function ProductForm({
   submitLabel,
   blobEnabled,
   existingImages,
+  categories,
 }: {
   action: (formData: FormData) => void;
   initial?: ProductFormValues;
   submitLabel: string;
   blobEnabled: boolean;
   existingImages?: GalleryImage[];
+  categories: string[];
 }) {
+  const categoryOptions =
+    initial?.category && !categories.includes(initial.category)
+      ? [...categories, initial.category]
+      : categories;
   return (
     <form action={action} encType="multipart/form-data" className="flex max-w-xl flex-col gap-4">
       <div>
@@ -71,13 +77,31 @@ export function ProductForm({
       </div>
       <div>
         <label className="mb-1 block text-sm font-medium text-gray-700">Categoría</label>
-        <input
-          name="category"
-          required
-          placeholder="Ej: Remeras, Pantalones, Vestidos"
-          defaultValue={initial?.category}
-          className="w-full rounded-lg border border-gray-300 px-3 py-2"
-        />
+        {categoryOptions.length > 0 ? (
+          <select
+            name="category"
+            required
+            defaultValue={initial?.category ?? ""}
+            className="w-full rounded-lg border border-gray-300 px-3 py-2"
+          >
+            <option value="" disabled>
+              Elegí una categoría
+            </option>
+            {categoryOptions.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <p className="rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-500">
+            Todavía no cargaste categorías. Creá una primero en{" "}
+            <a href="/admin/categorias" className="text-brand-600 hover:underline">
+              Categorías
+            </a>
+            .
+          </p>
+        )}
       </div>
 
       <div>

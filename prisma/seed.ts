@@ -628,6 +628,17 @@ async function main() {
     create: { id: "singleton" },
   });
 
+  // Categorías del catálogo base, para que el admin pueda gestionarlas desde
+  // /admin/categorias sin perder las que ya vienen cargadas.
+  const categoriaNombres = [...new Set(catalogo.map((p) => p.category))];
+  for (let i = 0; i < categoriaNombres.length; i++) {
+    await prisma.category.upsert({
+      where: { name: categoriaNombres[i] },
+      update: {},
+      create: { name: categoriaNombres[i], position: i },
+    });
+  }
+
   // Reemplazo total del catálogo: se quita todo lo que no esté en la lista nueva.
   // Si un producto viejo tiene pedidos asociados no se puede borrar (por la
   // integridad del historial), así que en ese caso se lo desactiva en vez de
