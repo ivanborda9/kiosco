@@ -43,6 +43,7 @@ export async function updateCanchaConfig(data: {
   depositAmount: number;
   whatsappNumber: string;
   callmebotApiKey: string;
+  logoUrl: string | null;
 }) {
   return prisma.canchaConfig.upsert({
     where: { id: CONFIG_ID },

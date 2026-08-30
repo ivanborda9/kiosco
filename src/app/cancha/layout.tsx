@@ -8,10 +8,16 @@ export default async function CanchaLayout({ children }: { children: React.React
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-40 border-b border-brand-100 bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
-          <Link href="/cancha" className="text-xl font-bold text-brand-700">
-            ⚽ {config.courtName}
+          <Link href="/cancha" className="flex items-center gap-2 text-2xl font-extrabold tracking-tight text-brand-700">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={config.logoUrl || "/club-logo.svg"}
+              alt={config.courtName}
+              className="h-11 w-11 object-contain"
+            />
+            {config.courtName}
           </Link>
-          <nav className="flex items-center gap-4 text-sm font-medium">
+          <nav className="flex items-center gap-5 text-base font-bold">
             <Link href="/merch" className="text-brand-600 hover:underline">
               Merch PORTE
             </Link>

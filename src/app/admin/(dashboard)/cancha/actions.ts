@@ -20,6 +20,7 @@ export async function saveCanchaConfig(formData: FormData) {
   const closedWeekdays = formData.getAll("closedWeekdays").map(String).join(",");
   const whatsappNumber = String(formData.get("whatsappNumber") || "").trim();
   const callmebotApiKey = String(formData.get("callmebotApiKey") || "").trim();
+  const logoUrl = String(formData.get("logoUrl") || "").trim() || null;
 
   await updateCanchaConfig({
     courtName,
@@ -31,6 +32,7 @@ export async function saveCanchaConfig(formData: FormData) {
     closedWeekdays,
     whatsappNumber,
     callmebotApiKey,
+    logoUrl,
   });
 
   revalidatePath("/cancha", "layout");

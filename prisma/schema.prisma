@@ -93,6 +93,7 @@ model CanchaConfig {
   depositAmount   Float    @default(5000)
   whatsappNumber  String   @default("")
   callmebotApiKey String   @default("")
+  logoUrl         String?
   updatedAt       DateTime @updatedAt
 }
 

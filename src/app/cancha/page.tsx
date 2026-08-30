@@ -10,8 +10,10 @@ export default async function CanchaPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900">Reservá tu turno</h1>
-      <p className="mt-1 text-sm text-gray-500">
+      <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+        Reservá tu turno
+      </h1>
+      <p className="mt-2 text-base text-gray-600">
         Elegí el día y el horario en el calendario. Para confirmar el turno pagás una seña de{" "}
         {formatPrice(config.depositAmount)} con Mercado Pago — no hace falta registrarte, solo tu
         nombre y celular.

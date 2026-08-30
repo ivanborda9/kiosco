@@ -62,6 +62,22 @@ export default async function AdminCanchaPage({
           />
         </div>
 
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">
+            URL del logo del club (opcional)
+          </label>
+          <input
+            name="logoUrl"
+            placeholder="https://..."
+            defaultValue={config.logoUrl ?? ""}
+            className="w-full rounded-lg border border-gray-300 px-3 py-2"
+          />
+          <p className="mt-1 text-xs text-gray-400">
+            Si la dejás vacía, se usa un escudo genérico de ejemplo. Subí tu logo a cualquier
+            hosting de imágenes y pegá el link acá.
+          </p>
+        </div>
+
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700">Precio del turno</label>
