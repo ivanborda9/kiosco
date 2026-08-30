@@ -153,6 +153,36 @@ export default async function AdminCanchaPage({
             defaultValue={config.whatsappNumber}
             className="w-full rounded-lg border border-gray-300 px-3 py-2"
           />
+          <p className="mt-1 text-xs text-gray-400">
+            A este número le llegan los avisos de WhatsApp cuando alguien reserva o cancela un
+            turno (necesita la API key de abajo).
+          </p>
+        </div>
+
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">
+            API key de CallMeBot (avisos de WhatsApp)
+          </label>
+          <input
+            name="callmebotApiKey"
+            placeholder="Ej: 123456"
+            defaultValue={config.callmebotApiKey}
+            className="w-full rounded-lg border border-gray-300 px-3 py-2"
+          />
+          <p className="mt-1 text-xs text-gray-400">
+            Sin esta clave no se envían los avisos. Se consigue gratis en 2 minutos: guardá el
+            contacto de CallMeBot desde{" "}
+            <a
+              href="https://www.callmebot.com/blog/free-api-whatsapp-messages/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-brand-600 hover:underline"
+            >
+              callmebot.com/whatsapp
+            </a>
+            , mandale el mensaje que piden desde el WhatsApp del número de arriba, y te responde
+            con la API key.
+          </p>
         </div>
 
         <button

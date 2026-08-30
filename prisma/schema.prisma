@@ -92,6 +92,7 @@ model CanchaConfig {
   pricePerSlot    Float    @default(20000)
   depositAmount   Float    @default(5000)
   whatsappNumber  String   @default("")
+  callmebotApiKey String   @default("")
   updatedAt       DateTime @updatedAt
 }
 

@@ -11,9 +11,14 @@ export default async function CanchaLayout({ children }: { children: React.React
           <Link href="/cancha" className="text-xl font-bold text-brand-700">
             ⚽ {config.courtName}
           </Link>
-          <Link href="/" className="text-sm font-medium text-gray-500 hover:text-brand-600">
-            Volver al inicio
-          </Link>
+          <nav className="flex items-center gap-4 text-sm font-medium">
+            <Link href="/merch" className="text-brand-600 hover:underline">
+              Merch PORTE
+            </Link>
+            <Link href="/carrito" className="text-gray-500 hover:text-brand-600">
+              Carrito
+            </Link>
+          </nav>
         </div>
       </header>
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-6">{children}</main>

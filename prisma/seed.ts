@@ -600,6 +600,119 @@ const catalogo = [
   },
 ];
 
+// Catálogo de merchandising para los deploys de la cancha (SITE_MODE=cancha),
+// con el mismo esquema de id fijo + upsert que el catálogo de ropa.
+const merchCatalogo = [
+  {
+    id: "seed-merch-camiseta-titular",
+    name: "Camiseta titular",
+    description: "Camiseta oficial titular del club, tela dry-fit transpirable.",
+    price: 32000,
+    category: "Camisetas",
+    stock: 25,
+    imageUrl: "https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=600&q=80",
+  },
+  {
+    id: "seed-merch-camiseta-suplente",
+    name: "Camiseta suplente",
+    description: "Camiseta oficial alternativa, mismo tejido que la titular.",
+    price: 32000,
+    category: "Camisetas",
+    stock: 20,
+    imageUrl: "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=600&q=80",
+  },
+  {
+    id: "seed-merch-camiseta-arquero",
+    name: "Camiseta de arquero",
+    description: "Camiseta de arquero, tela reforzada, colores oficiales.",
+    price: 33500,
+    category: "Camisetas",
+    stock: 12,
+    imageUrl: "https://images.unsplash.com/photo-1543326727-cf6c39e8f84c?w=600&q=80",
+  },
+  {
+    id: "seed-merch-bufanda-oficial",
+    name: "Bufanda oficial",
+    description: "Bufanda de hinchada con los colores y el escudo del club.",
+    price: 9500,
+    category: "Bufandas",
+    stock: 40,
+    imageUrl: "https://images.unsplash.com/photo-1520903920243-00d872a2d1c9?w=600&q=80",
+  },
+  {
+    id: "seed-merch-bufanda-invierno",
+    name: "Bufanda de invierno acolchada",
+    description: "Versión abrigada de la bufanda oficial, ideal para la cancha en invierno.",
+    price: 11500,
+    category: "Bufandas",
+    stock: 25,
+    imageUrl: "https://images.unsplash.com/photo-1601924357840-3e50ae4ff0a3?w=600&q=80",
+  },
+  {
+    id: "seed-merch-gorra-oficial",
+    name: "Gorra oficial",
+    description: "Gorra con el escudo bordado, ajustable, colores del club.",
+    price: 12500,
+    category: "Gorras",
+    stock: 30,
+    imageUrl: "https://images.unsplash.com/photo-1521369909029-2afed882baee?w=600&q=80",
+  },
+  {
+    id: "seed-merch-gorra-invierno",
+    name: "Gorro de lana",
+    description: "Gorro de lana tejido con los colores del club, ideal para el invierno.",
+    price: 8500,
+    category: "Gorras",
+    stock: 22,
+    imageUrl: "https://images.unsplash.com/photo-1576871337622-98d48d1cf531?w=600&q=80",
+  },
+  {
+    id: "seed-merch-pelota-oficial",
+    name: "Pelota oficial N°5",
+    description: "Pelota de fútbol N°5 con el logo del club, para entrenar o alentar.",
+    price: 18500,
+    category: "Accesorios",
+    stock: 18,
+    imageUrl: "https://images.unsplash.com/photo-1614632537190-23e4b2e69c88?w=600&q=80",
+  },
+  {
+    id: "seed-merch-mochila-club",
+    name: "Mochila del club",
+    description: "Mochila deportiva con el escudo bordado, varios compartimentos.",
+    price: 24500,
+    category: "Accesorios",
+    stock: 15,
+    imageUrl: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600&q=80",
+  },
+  {
+    id: "seed-merch-buzo-entrenamiento",
+    name: "Buzo de entrenamiento",
+    description: "Buzo canguro oficial del cuerpo técnico, friza interior.",
+    price: 27500,
+    category: "Buzos",
+    stock: 20,
+    imageUrl: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600&q=80",
+  },
+  {
+    id: "seed-merch-taza-club",
+    name: "Taza del club",
+    description: "Taza de cerámica con el escudo, ideal para el mate o el café.",
+    price: 6500,
+    category: "Accesorios",
+    stock: 35,
+    imageUrl: "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=600&q=80",
+  },
+  {
+    id: "seed-merch-llavero-escudo",
+    name: "Llavero con el escudo",
+    description: "Llavero metálico con el escudo del club en relieve.",
+    price: 3500,
+    category: "Accesorios",
+    stock: 50,
+    imageUrl: "https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd?w=600&q=80",
+  },
+];
+
 const resellers = [
   {
     name: "Ana García",
@@ -633,11 +746,15 @@ async function main() {
     create: { id: "singleton" },
   });
 
+  // Los deploys dedicados a la cancha (SITE_MODE=cancha) cargan merchandising
+  // del club en vez del catálogo de ropa.
+  const catalogoActivo = process.env.SITE_MODE === "cancha" ? merchCatalogo : catalogo;
+
   // Reemplazo total del catálogo: se quita todo lo que no esté en la lista nueva.
   // Si un producto viejo tiene pedidos asociados no se puede borrar (por la
   // integridad del historial), así que en ese caso se lo desactiva en vez de
   // eliminarlo, para que no siga apareciendo en el catálogo público.
-  const validIds = new Set(catalogo.map((p) => p.id));
+  const validIds = new Set(catalogoActivo.map((p) => p.id));
   const existentes = await prisma.product.findMany({ select: { id: true } });
   let eliminados = 0;
   let desactivados = 0;
@@ -652,7 +769,7 @@ async function main() {
     }
   }
 
-  for (const p of catalogo) {
+  for (const p of catalogoActivo) {
     await prisma.product.upsert({
       where: { id: p.id },
       update: {},
@@ -660,20 +777,22 @@ async function main() {
     });
   }
   console.log(
-    `Catálogo verificado: ${catalogo.length} productos. Productos anteriores: ${eliminados} eliminados, ${desactivados} desactivados (tenían pedidos asociados).`
+    `Catálogo verificado: ${catalogoActivo.length} productos. Productos anteriores: ${eliminados} eliminados, ${desactivados} desactivados (tenían pedidos asociados).`
   );
 
-  const passwordHash = await hashPassword(DEMO_RESELLER_PASSWORD);
-  for (const r of resellers) {
-    await prisma.reseller.upsert({
-      where: { email: r.email },
-      update: {},
-      create: { ...r, passwordHash },
-    });
+  if (process.env.SITE_MODE !== "cancha") {
+    const passwordHash = await hashPassword(DEMO_RESELLER_PASSWORD);
+    for (const r of resellers) {
+      await prisma.reseller.upsert({
+        where: { email: r.email },
+        update: {},
+        create: { ...r, passwordHash },
+      });
+    }
+    console.log(
+      `Revendedoras de ejemplo verificadas: ${resellers.length} (contraseña de prueba: "${DEMO_RESELLER_PASSWORD}").`
+    );
   }
-  console.log(
-    `Revendedoras de ejemplo verificadas: ${resellers.length} (contraseña de prueba: "${DEMO_RESELLER_PASSWORD}").`
-  );
 }
 
 main()

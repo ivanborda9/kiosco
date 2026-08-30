@@ -9,6 +9,7 @@ import {
   todayDateString,
 } from "@/lib/cancha";
 import { createBookingPreference, isMercadoPagoEnabled } from "@/lib/mercadopago";
+import { sendCallMeBotMessage } from "@/lib/notify";
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_RE = /^\d{2}:\d{2}$/;
@@ -84,6 +85,12 @@ export async function POST(req: NextRequest) {
         return tx.booking.update({ where: { id: existing.id }, data });
       }
       return tx.booking.create({ data: { date, startTime, ...data } });
+    });
+
+    await sendCallMeBotMessage({
+      phone: config.whatsappNumber,
+      apiKey: config.callmebotApiKey,
+      message: `⚽ Nueva reserva en ${config.courtName}\nFecha: ${date} a las ${startTime}\nCliente: ${customerName} (${customerPhone})`,
     });
 
     try {

@@ -42,6 +42,7 @@ export async function updateCanchaConfig(data: {
   pricePerSlot: number;
   depositAmount: number;
   whatsappNumber: string;
+  callmebotApiKey: string;
 }) {
   return prisma.canchaConfig.upsert({
     where: { id: CONFIG_ID },
