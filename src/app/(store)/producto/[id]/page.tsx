@@ -41,9 +41,11 @@ export default async function ProductPage({ params }: { params: { id: string } }
             }}
           />
         </div>
-        <p className="mt-6 rounded-lg bg-brand-50 px-4 py-3 text-sm text-brand-700">
-          ¿Sos revendedora? Ingresá tu código de descuento al finalizar la compra.
-        </p>
+        {process.env.SITE_MODE !== "cancha" && (
+          <p className="mt-6 rounded-lg bg-brand-50 px-4 py-3 text-sm text-brand-700">
+            ¿Sos revendedora? Ingresá tu código de descuento al finalizar la compra.
+          </p>
+        )}
       </div>
     </div>
   );

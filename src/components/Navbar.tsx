@@ -3,7 +3,13 @@
 import Link from "next/link";
 import { useCart } from "./CartProvider";
 
-export function Navbar({ storeName }: { storeName: string }) {
+export function Navbar({
+  storeName,
+  showReseller = true,
+}: {
+  storeName: string;
+  showReseller?: boolean;
+}) {
   const { totalCount } = useCart();
 
   return (
@@ -16,9 +22,11 @@ export function Navbar({ storeName }: { storeName: string }) {
           <Link href="/" className="hover:text-brand-600">
             Catálogo
           </Link>
-          <Link href="/revendedora" className="hover:text-brand-600">
-            Quiero ser revendedora
-          </Link>
+          {showReseller && (
+            <Link href="/revendedora" className="hover:text-brand-600">
+              Quiero ser revendedora
+            </Link>
+          )}
           <Link href="/cancha" className="hover:text-brand-600">
             Reservar cancha
           </Link>

@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { ProductCard } from "@/components/ProductCard";
-import { getSiteSettings } from "@/lib/settings";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +11,7 @@ export default async function MerchPage({
 }) {
   const categoria = searchParams.categoria;
 
-  const [products, categoriesRaw, settings] = await Promise.all([
+  const [products, categoriesRaw] = await Promise.all([
     prisma.product.findMany({
       where: { active: true, ...(categoria ? { category: categoria } : {}) },
       orderBy: { createdAt: "desc" },
@@ -22,26 +21,16 @@ export default async function MerchPage({
       select: { category: true },
       distinct: ["category"],
     }),
-    getSiteSettings(),
   ]);
 
   const categories = categoriesRaw.map((c) => c.category).sort();
 
   return (
     <div>
-      <section
-        className="mb-8 rounded-2xl bg-gradient-to-r from-brand-500 to-brand-700 bg-cover bg-center px-6 py-10 text-white"
-        style={
-          settings.bannerImageUrl
-            ? { backgroundImage: `linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url(${settings.bannerImageUrl})` }
-            : undefined
-        }
-      >
-        <h1 className="text-3xl font-bold sm:text-4xl">Merch {settings.storeName}</h1>
-        <p className="mt-2 max-w-xl text-brand-50">
-          Camisetas, bufandas y todo lo necesario para alentar al club.
-        </p>
-      </section>
+      <h1 className="mb-1 text-2xl font-bold text-gray-900">Merch PORTE</h1>
+      <p className="mb-6 text-sm text-gray-500">
+        Camisetas, bufandas y todo lo necesario para alentar al club.
+      </p>
 
       <div className="mb-6 flex flex-wrap gap-2">
         <Link
@@ -70,7 +59,7 @@ export default async function MerchPage({
       </div>
 
       {products.length === 0 ? (
-        <p className="py-16 text-center text-gray-500">No hay productos en esta categoría todavía.</p>
+        <p className="py-16 text-center text-gray-500">No hay productos cargados todavía.</p>
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {products.map((p) => (

@@ -14,7 +14,13 @@ type CodeState =
 
 type PaymentMethod = "WHATSAPP" | "MERCADOPAGO";
 
-export function CheckoutForm({ mercadoPagoEnabled }: { mercadoPagoEnabled: boolean }) {
+export function CheckoutForm({
+  mercadoPagoEnabled,
+  showResellerCode = true,
+}: {
+  mercadoPagoEnabled: boolean;
+  showResellerCode?: boolean;
+}) {
   const { items, subtotal, clear } = useCart();
   const router = useRouter();
 
@@ -151,40 +157,42 @@ export function CheckoutForm({ mercadoPagoEnabled }: { mercadoPagoEnabled: boole
           />
         </div>
 
-        <div className="rounded-lg border border-brand-200 bg-brand-50 p-4">
-          <label className="mb-1 block text-sm font-medium text-brand-800">
-            ¿Comprás a través de una revendedora? Ingresá su código
-          </label>
-          <div className="flex gap-2">
-            <input
-              value={code}
-              onChange={(e) => {
-                setCode(e.target.value);
-                setCodeState({ status: "idle" });
-              }}
-              placeholder="Ej: ANA10"
-              className="flex-1 rounded-lg border border-gray-300 px-3 py-2 uppercase"
-            />
-            <button
-              type="button"
-              onClick={checkCode}
-              className="rounded-lg bg-brand-600 px-4 py-2 font-semibold text-white hover:bg-brand-700"
-            >
-              Validar
-            </button>
+        {showResellerCode && (
+          <div className="rounded-lg border border-brand-200 bg-brand-50 p-4">
+            <label className="mb-1 block text-sm font-medium text-brand-800">
+              ¿Comprás a través de una revendedora? Ingresá su código
+            </label>
+            <div className="flex gap-2">
+              <input
+                value={code}
+                onChange={(e) => {
+                  setCode(e.target.value);
+                  setCodeState({ status: "idle" });
+                }}
+                placeholder="Ej: ANA10"
+                className="flex-1 rounded-lg border border-gray-300 px-3 py-2 uppercase"
+              />
+              <button
+                type="button"
+                onClick={checkCode}
+                className="rounded-lg bg-brand-600 px-4 py-2 font-semibold text-white hover:bg-brand-700"
+              >
+                Validar
+              </button>
+            </div>
+            {codeState.status === "checking" && (
+              <p className="mt-2 text-sm text-brand-700">Validando...</p>
+            )}
+            {codeState.status === "valid" && (
+              <p className="mt-2 text-sm font-medium text-green-700">
+                ¡Código de {codeState.name} aplicado! {codeState.discountPercent}% de descuento.
+              </p>
+            )}
+            {codeState.status === "invalid" && (
+              <p className="mt-2 text-sm font-medium text-red-600">{codeState.message}</p>
+            )}
           </div>
-          {codeState.status === "checking" && (
-            <p className="mt-2 text-sm text-brand-700">Validando...</p>
-          )}
-          {codeState.status === "valid" && (
-            <p className="mt-2 text-sm font-medium text-green-700">
-              ¡Código de {codeState.name} aplicado! {codeState.discountPercent}% de descuento.
-            </p>
-          )}
-          {codeState.status === "invalid" && (
-            <p className="mt-2 text-sm font-medium text-red-600">{codeState.message}</p>
-          )}
-        </div>
+        )}
 
         <div>
           <span className="mb-2 block text-sm font-medium text-gray-700">¿Cómo querés pagar?</span>
