@@ -24,6 +24,11 @@ export default async function CanchaLayout({ children }: { children: React.React
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-6">{children}</main>
       <footer className="mt-16 border-t border-brand-100 bg-white py-6 text-center text-sm text-gray-500">
         <p>Reservá tu turno y pagá la seña online para confirmarlo al instante.</p>
+        <p className="mt-2">
+          <Link href="/admin" className="hover:text-brand-600 hover:underline">
+            Acceso administrador
+          </Link>
+        </p>
       </footer>
     </div>
   );
