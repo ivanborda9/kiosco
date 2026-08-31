@@ -19,7 +19,7 @@ export default async function CanchaLayout({ children }: { children: React.React
           </Link>
           <nav className="flex items-center gap-5 text-base font-bold">
             <Link href="/merch" className="text-brand-600 hover:underline">
-              Merch PORTE
+              Tienda PORTE
             </Link>
             <Link href="/carrito" className="text-gray-500 hover:text-brand-600">
               Carrito

@@ -28,7 +28,7 @@ export default async function MerchPage({
   return (
     <div>
       <h1 className="mb-1 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
-        Merch PORTE
+        Tienda PORTE
       </h1>
       <p className="mb-6 text-base text-gray-600">
         Camisetas, bufandas y todo lo necesario para alentar al club.

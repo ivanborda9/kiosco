@@ -14,10 +14,10 @@ export default async function MerchLayout({ children }: { children: React.ReactN
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={config.logoUrl || "/club-logo.svg"}
-                alt="Merch PORTE"
+                alt="Tienda PORTE"
                 className="h-11 w-11 object-contain"
               />
-              Merch PORTE
+              Tienda PORTE
             </Link>
             <nav className="flex items-center gap-5 text-base font-bold">
               <Link href="/cancha" className="text-gray-500 hover:text-brand-600">
