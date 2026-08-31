@@ -27,6 +27,9 @@ export function Navbar({ storeName }: { storeName: string }) {
               </span>
             )}
           </Link>
+          <Link href="/admin" className="text-gray-400 hover:text-brand-600">
+            Admin
+          </Link>
         </nav>
       </div>
     </header>
