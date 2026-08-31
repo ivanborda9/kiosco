@@ -10,9 +10,10 @@ export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   // Despliegues dedicados a la cancha (SITE_MODE=cancha en las variables de entorno)
-  // usan /cancha como portada en vez del catálogo de ropa.
+  // muestran la página de inicio del club en vez del catálogo de ropa. Se usa
+  // rewrite (no redirect) para que la URL siga siendo "/".
   if (pathname === "/" && process.env.SITE_MODE === "cancha") {
-    return NextResponse.redirect(new URL("/cancha", req.url));
+    return NextResponse.rewrite(new URL("/inicio", req.url));
   }
 
   if (pathname.startsWith("/admin")) {
