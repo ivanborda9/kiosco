@@ -1,16 +1,18 @@
 import Link from "next/link";
 import { logoutAction } from "../login/actions";
 
-const links = [
+const allLinks = [
   { href: "/admin", label: "Resumen" },
   { href: "/admin/productos", label: "Productos" },
-  { href: "/admin/revendedoras", label: "Revendedoras" },
+  { href: "/admin/revendedoras", label: "Revendedoras", resellerOnly: true },
   { href: "/admin/pedidos", label: "Pedidos" },
   { href: "/admin/cancha", label: "Cancha" },
   { href: "/admin/configuracion", label: "Configuración" },
 ];
 
 export default function AdminDashboardLayout({ children }: { children: React.ReactNode }) {
+  const links = allLinks.filter((link) => !link.resellerOnly || process.env.SITE_MODE !== "cancha");
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       <aside className="hidden w-56 flex-shrink-0 flex-col border-r border-gray-200 bg-white p-4 sm:flex">
