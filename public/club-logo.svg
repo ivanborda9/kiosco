@@ -1,35 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
   <defs>
-    <path id="topArc" d="M 55,205 A 145,145 0 0 1 345,205" />
-    <path id="bottomArc" d="M 75,260 A 128,128 0 0 0 325,260" />
     <clipPath id="shieldClip">
-      <path d="M200,88 L262,110 L262,222 C262,274 230,306 200,326 C170,306 138,274 138,222 L138,110 Z"/>
+      <path d="M200,40 L320,75 L320,210 C320,290 270,340 200,370 C130,340 80,290 80,210 L80,75 Z"/>
     </clipPath>
   </defs>
 
-  <circle cx="200" cy="200" r="188" fill="#ffffff" stroke="#111111" stroke-width="6"/>
-
   <g clip-path="url(#shieldClip)">
-    <rect x="138" y="88" width="25" height="240" fill="#cc1f1f"/>
-    <rect x="163" y="88" width="25" height="240" fill="#ffffff"/>
-    <rect x="188" y="88" width="25" height="240" fill="#cc1f1f"/>
-    <rect x="213" y="88" width="25" height="240" fill="#ffffff"/>
-    <rect x="238" y="88" width="25" height="240" fill="#cc1f1f"/>
+    <rect x="80"  y="40" width="34.3" height="330" fill="#cc1f1f"/>
+    <rect x="114.3" y="40" width="34.3" height="330" fill="#ffffff"/>
+    <rect x="148.6" y="40" width="34.3" height="330" fill="#cc1f1f"/>
+    <rect x="182.9" y="40" width="34.3" height="330" fill="#ffffff"/>
+    <rect x="217.1" y="40" width="34.3" height="330" fill="#cc1f1f"/>
+    <rect x="251.4" y="40" width="34.3" height="330" fill="#ffffff"/>
+    <rect x="285.7" y="40" width="34.3" height="330" fill="#cc1f1f"/>
   </g>
-  <path d="M200,88 L262,110 L262,222 C262,274 230,306 200,326 C170,306 138,274 138,222 L138,110 Z"
-        fill="none" stroke="#111111" stroke-width="5"/>
+  <path d="M200,40 L320,75 L320,210 C320,290 270,340 200,370 C130,340 80,290 80,210 L80,75 Z"
+        fill="none" stroke="#111111" stroke-width="9"/>
 
-  <circle cx="200" cy="196" r="36" fill="#ffffff" stroke="#111111" stroke-width="4"/>
-  <text x="200" y="207" font-family="Arial, sans-serif" font-size="26" font-weight="bold"
+  <circle cx="200" cy="205" r="46" fill="#ffffff" stroke="#111111" stroke-width="6"/>
+  <text x="200" y="219" font-family="Arial, sans-serif" font-size="32" font-weight="bold"
         fill="#111111" text-anchor="middle">FCP</text>
-
-  <text font-family="Arial, sans-serif" font-size="25" font-weight="bold" fill="#111111" letter-spacing="1">
-    <textPath href="#topArc" startOffset="50%" text-anchor="middle">FOOTBALL CLUB PORTEÑO</textPath>
-  </text>
-  <text font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#111111" letter-spacing="2">
-    <textPath href="#bottomArc" startOffset="50%" text-anchor="middle">CACHARÍ</textPath>
-  </text>
-
-  <circle cx="72" cy="258" r="4" fill="#111111"/>
-  <circle cx="328" cy="258" r="4" fill="#111111"/>
 </svg>
