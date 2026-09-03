@@ -149,7 +149,9 @@ export function CheckoutForm({ mercadoPagoEnabled }: { mercadoPagoEnabled: boole
           )}
           {codeState.status === "valid" && (
             <p className="mt-2 text-sm font-medium text-green-700">
-              ¡Código de {codeState.name} aplicado! {codeState.discountPercent}% de descuento.
+              {codeState.discountPercent > 0
+                ? `¡Código de ${codeState.name} aplicado! ${codeState.discountPercent}% de descuento.`
+                : `Código de ${codeState.name} aplicado. Por el momento no tiene descuento para la clienta.`}
             </p>
           )}
           {codeState.status === "invalid" && (

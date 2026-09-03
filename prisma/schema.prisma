@@ -62,7 +62,7 @@ model Reseller {
   discountPercent   Float    @default(10)
   commissionPercent Float    @default(15)
   active            Boolean  @default(true)
-  codeActive        Boolean  @default(true)
+  discountActive    Boolean  @default(true)
   lastPayoutAt      DateTime?
   createdAt         DateTime @default(now())
 

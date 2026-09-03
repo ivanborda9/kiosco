@@ -44,10 +44,11 @@ export default async function RevendedoraPanelPage() {
           empezar a funcionar en el checkout.
         </p>
       )}
-      {reseller.active && !reseller.codeActive && (
-        <p className="mb-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
-          Tu código de descuento está deshabilitado temporalmente por el administrador y no se
-          puede usar en el checkout.
+      {reseller.active && !reseller.discountActive && (
+        <p className="mb-6 rounded-lg bg-yellow-50 px-4 py-3 text-sm text-yellow-800">
+          El descuento para tus clientas está deshabilitado temporalmente por el administrador.
+          Tu código sigue funcionando y sigue generando tu comisión, solo que sin descuento por
+          ahora.
         </p>
       )}
 

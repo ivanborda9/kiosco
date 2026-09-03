@@ -58,8 +58,8 @@ export async function toggleResellerActive(id: string, active: boolean) {
   revalidatePath("/admin/revendedoras");
 }
 
-export async function toggleResellerCodeActive(id: string, codeActive: boolean) {
-  await prisma.reseller.update({ where: { id }, data: { codeActive } });
+export async function toggleResellerDiscountActive(id: string, discountActive: boolean) {
+  await prisma.reseller.update({ where: { id }, data: { discountActive } });
   revalidatePath("/admin/revendedoras");
 }
 

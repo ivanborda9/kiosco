@@ -46,9 +46,10 @@ por cada venta.
   comisión total histórica y la comisión pendiente (desde el último pago);
   el botón **"Marcar pagada"** registra la fecha de pago y reinicia el
   contador de pendiente a $0, sin borrar el historial de ventas. También se
-  puede **habilitar/deshabilitar el código de descuento** de forma
-  independiente de si la cuenta está activa (por ejemplo, para pausarlo
-  temporalmente sin bloquearle el acceso a su panel)
+  puede **habilitar/deshabilitar el descuento para la clienta** de forma
+  independiente de la cuenta y del código: si se deshabilita, el código
+  sigue funcionando y sigue generando comisión para la revendedora, solo
+  que sin aplicarle descuento a la compra
 - Listado de pedidos con detalle y cambio de estado (pendiente, confirmado,
   enviado, cancelado); los pedidos cancelados se pueden eliminar de la lista
 - **Banners** (`/admin/banners`): carrusel de banners para la home, subiendo
