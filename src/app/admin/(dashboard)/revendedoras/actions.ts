@@ -57,6 +57,11 @@ export async function toggleResellerActive(id: string, active: boolean) {
   revalidatePath("/admin/revendedoras");
 }
 
+export async function markCommissionPaid(id: string) {
+  await prisma.reseller.update({ where: { id }, data: { lastPayoutAt: new Date() } });
+  revalidatePath("/admin/revendedoras");
+}
+
 export async function deleteReseller(id: string) {
   try {
     await prisma.reseller.delete({ where: { id } });

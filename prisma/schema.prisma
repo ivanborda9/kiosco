@@ -49,6 +49,7 @@ model Reseller {
   discountPercent   Float    @default(10)
   commissionPercent Float    @default(15)
   active            Boolean  @default(true)
+  lastPayoutAt      DateTime?
   createdAt         DateTime @default(now())
 
   orders Order[]

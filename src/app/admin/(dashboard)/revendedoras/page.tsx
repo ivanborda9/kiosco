@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { formatPrice } from "@/lib/format";
-import { toggleResellerActive, deleteReseller } from "./actions";
+import { formatPrice, formatDate } from "@/lib/format";
+import { toggleResellerActive, deleteReseller, markCommissionPaid } from "./actions";
 import { ConfirmSubmitButton } from "@/components/admin/ConfirmSubmitButton";
 
 export const dynamic = "force-dynamic";
@@ -33,7 +33,9 @@ export default async function AdminResellersPage() {
               <th className="px-4 py-3">Descuento clienta</th>
               <th className="px-4 py-3">Comisión</th>
               <th className="px-4 py-3">Ventas</th>
-              <th className="px-4 py-3">Comisión ganada</th>
+              <th className="px-4 py-3">Comisión total</th>
+              <th className="px-4 py-3">Comisión pendiente</th>
+              <th className="px-4 py-3">Último pago</th>
               <th className="px-4 py-3">Estado</th>
               <th className="px-4 py-3 text-right">Acciones</th>
             </tr>
@@ -42,6 +44,9 @@ export default async function AdminResellersPage() {
             {resellers.map((r) => {
               const activeOrders = r.orders.filter((o) => o.status !== "CANCELADO");
               const earned = activeOrders.reduce((sum, o) => sum + o.commissionAmount, 0);
+              const pending = activeOrders
+                .filter((o) => !r.lastPayoutAt || o.createdAt > r.lastPayoutAt)
+                .reduce((sum, o) => sum + o.commissionAmount, 0);
               return (
                 <tr key={r.id}>
                   <td className="px-4 py-3 font-medium text-gray-900">{r.name}</td>
@@ -50,6 +55,10 @@ export default async function AdminResellersPage() {
                   <td className="px-4 py-3">{r.commissionPercent}%</td>
                   <td className="px-4 py-3">{activeOrders.length}</td>
                   <td className="px-4 py-3 font-semibold">{formatPrice(earned)}</td>
+                  <td className="px-4 py-3 font-semibold text-brand-700">{formatPrice(pending)}</td>
+                  <td className="px-4 py-3 text-xs text-gray-500">
+                    {r.lastPayoutAt ? formatDate(r.lastPayoutAt) : "Nunca"}
+                  </td>
                   <td className="px-4 py-3">
                     <span
                       className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
@@ -69,6 +78,18 @@ export default async function AdminResellersPage() {
                           {r.active ? "Desactivar" : "Activar"}
                         </button>
                       </form>
+                      {pending > 0 && (
+                        <form action={markCommissionPaid.bind(null, r.id)}>
+                          <ConfirmSubmitButton
+                            confirmMessage={`¿Confirmás que ya le pagaste ${formatPrice(
+                              pending
+                            )} de comisión a ${r.name}? Se va a reiniciar el contador de comisión pendiente.`}
+                            className="text-green-600 hover:underline"
+                          >
+                            Marcar pagada
+                          </ConfirmSubmitButton>
+                        </form>
+                      )}
                       <form action={deleteReseller.bind(null, r.id)}>
                         <ConfirmSubmitButton
                           confirmMessage="¿Eliminar esta revendedora? Si tiene ventas asociadas, se desactivará en su lugar."

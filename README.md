@@ -30,7 +30,10 @@ por cada venta.
   se eligen al cargar un producto y que aparecen como filtro en el catálogo. No
   se puede eliminar una categoría que todavía tiene productos cargados.
 - ABM de revendedoras: código de descuento, % de descuento para la clienta,
-  % de comisión y contraseña opcional para su panel
+  % de comisión y contraseña opcional para su panel. La lista muestra la
+  comisión total histórica y la comisión pendiente (desde el último pago);
+  el botón **"Marcar pagada"** registra la fecha de pago y reinicia el
+  contador de pendiente a $0, sin borrar el historial de ventas
 - Listado de pedidos con detalle y cambio de estado (pendiente, confirmado,
   enviado, cancelado); los pedidos cancelados se pueden eliminar de la lista
 - **Banners** (`/admin/banners`): carrusel de banners para la home, subiendo
@@ -46,7 +49,8 @@ por cada venta.
   descuento único y queda **pendiente de aprobación** (el admin la activa
   desde `/admin/revendedoras`)
 - Panel propio (`/revendedora/panel`) donde cada revendedora ve su código,
-  sus ventas y su comisión acumulada
+  sus ventas, la comisión acumulada desde el primer día y la comisión
+  pendiente desde el último pago que le registró el admin
 
 El descuento se calcula sobre el subtotal del pedido; la comisión de la
 revendedora se calcula sobre el total ya con el descuento aplicado.

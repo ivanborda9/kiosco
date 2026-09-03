@@ -18,6 +18,9 @@ export default async function RevendedoraPanelPage() {
   const activeOrders = orders.filter((o) => o.status !== "CANCELADO");
   const totalVentas = activeOrders.reduce((sum, o) => sum + o.total, 0);
   const comisionAcumulada = activeOrders.reduce((sum, o) => sum + o.commissionAmount, 0);
+  const comisionPendiente = activeOrders
+    .filter((o) => !reseller.lastPayoutAt || o.createdAt > reseller.lastPayoutAt)
+    .reduce((sum, o) => sum + o.commissionAmount, 0);
 
   return (
     <div className="mx-auto max-w-3xl py-8">
@@ -42,7 +45,7 @@ export default async function RevendedoraPanelPage() {
         </p>
       )}
 
-      <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-3">
+      <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
         <div className="rounded-xl border border-gray-200 bg-white p-4">
           <p className="text-xs uppercase tracking-wide text-gray-500">Ventas generadas</p>
           <p className="mt-1 text-xl font-bold text-gray-900">{activeOrders.length}</p>
@@ -52,8 +55,14 @@ export default async function RevendedoraPanelPage() {
           <p className="mt-1 text-xl font-bold text-gray-900">{formatPrice(totalVentas)}</p>
         </div>
         <div className="rounded-xl border border-gray-200 bg-white p-4">
-          <p className="text-xs uppercase tracking-wide text-gray-500">Comisión acumulada</p>
-          <p className="mt-1 text-xl font-bold text-brand-700">{formatPrice(comisionAcumulada)}</p>
+          <p className="text-xs uppercase tracking-wide text-gray-500">Comisión desde el primer día</p>
+          <p className="mt-1 text-xl font-bold text-gray-900">{formatPrice(comisionAcumulada)}</p>
+        </div>
+        <div className="rounded-xl border border-brand-200 bg-brand-50 p-4">
+          <p className="text-xs uppercase tracking-wide text-brand-700">
+            Comisión pendiente {reseller.lastPayoutAt ? `(desde ${formatDate(reseller.lastPayoutAt)})` : ""}
+          </p>
+          <p className="mt-1 text-xl font-bold text-brand-700">{formatPrice(comisionPendiente)}</p>
         </div>
       </div>
 
