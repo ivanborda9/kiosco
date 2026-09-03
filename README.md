@@ -16,7 +16,8 @@ por cada venta.
 **Sitio público**
 - Catálogo con filtro por categoría
 - Ficha de producto con selector de cantidad y, si el producto tiene
-  variantes, selector de color/talle con el stock de cada opción
+  variantes, un listado de **color** y otro de **talle** (cuando corresponda)
+  que se filtran entre sí y muestran sin stock las combinaciones agotadas
 - Carrito de compras (persistido en el navegador)
 - Checkout con datos de envío, campo para código de revendedora y elección
   de medio de pago: **tarjeta/Mercado Pago** (si está configurado) o
