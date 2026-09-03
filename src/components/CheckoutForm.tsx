@@ -18,9 +18,6 @@ export function CheckoutForm({ mercadoPagoEnabled }: { mercadoPagoEnabled: boole
   const { items, subtotal, clear } = useCart();
   const router = useRouter();
 
-  const [customerName, setCustomerName] = useState("");
-  const [customerPhone, setCustomerPhone] = useState("");
-  const [customerAddress, setCustomerAddress] = useState("");
   const [notes, setNotes] = useState("");
   const [code, setCode] = useState("");
   const [codeState, setCodeState] = useState<CodeState>({ status: "idle" });
@@ -77,9 +74,6 @@ export function CheckoutForm({ mercadoPagoEnabled }: { mercadoPagoEnabled: boole
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          customerName,
-          customerPhone,
-          customerAddress,
           notes,
           resellerCode: code,
           paymentMethod,
@@ -124,43 +118,6 @@ export function CheckoutForm({ mercadoPagoEnabled }: { mercadoPagoEnabled: boole
       <form onSubmit={handleSubmit} className="flex flex-col gap-4 lg:col-span-2">
         <h1 className="text-2xl font-bold text-gray-900">Finalizar compra</h1>
 
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Nombre y apellido</label>
-          <input
-            required
-            value={customerName}
-            onChange={(e) => setCustomerName(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2"
-          />
-        </div>
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Teléfono</label>
-          <input
-            required
-            value={customerPhone}
-            onChange={(e) => setCustomerPhone(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2"
-          />
-        </div>
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Dirección de envío</label>
-          <input
-            required
-            value={customerAddress}
-            onChange={(e) => setCustomerAddress(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2"
-          />
-        </div>
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Notas (opcional)</label>
-          <textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2"
-            rows={2}
-          />
-        </div>
-
         <div className="rounded-lg border border-brand-200 bg-brand-50 p-4">
           <label className="mb-1 block text-sm font-medium text-brand-800">
             Código de tu revendedora (obligatorio)
@@ -198,6 +155,19 @@ export function CheckoutForm({ mercadoPagoEnabled }: { mercadoPagoEnabled: boole
           {codeState.status === "invalid" && (
             <p className="mt-2 text-sm font-medium text-red-600">{codeState.message}</p>
           )}
+        </div>
+
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">
+            Nota del pedido (opcional)
+          </label>
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Ej: aclaraciones sobre el envío, urgencia, etc."
+            className="w-full rounded-lg border border-gray-300 px-3 py-2"
+            rows={2}
+          />
         </div>
 
         <div>

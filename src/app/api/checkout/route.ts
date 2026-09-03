@@ -7,9 +7,6 @@ type CheckoutItem = { productId: string; variantId: string | null; quantity: num
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
 
-  const customerName = typeof body?.customerName === "string" ? body.customerName.trim() : "";
-  const customerPhone = typeof body?.customerPhone === "string" ? body.customerPhone.trim() : "";
-  const customerAddress = typeof body?.customerAddress === "string" ? body.customerAddress.trim() : "";
   const notes = typeof body?.notes === "string" ? body.notes.trim() : "";
   const resellerCode =
     typeof body?.resellerCode === "string" && body.resellerCode.trim()
@@ -26,12 +23,6 @@ export async function POST(req: NextRequest) {
         }))
     : [];
 
-  if (!customerName || !customerPhone || !customerAddress) {
-    return NextResponse.json(
-      { error: "Nombre, teléfono y dirección son obligatorios." },
-      { status: 400 }
-    );
-  }
   if (items.length === 0) {
     return NextResponse.json({ error: "El carrito está vacío." }, { status: 400 });
   }
@@ -101,9 +92,9 @@ export async function POST(req: NextRequest) {
 
       const createdOrder = await tx.order.create({
         data: {
-          customerName,
-          customerPhone,
-          customerAddress,
+          customerName: reseller.name,
+          customerPhone: reseller.phone || "",
+          customerAddress: reseller.city || "",
           notes: notes || null,
           subtotal,
           discountAmount,

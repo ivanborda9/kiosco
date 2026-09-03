@@ -19,11 +19,14 @@ por cada venta.
   variantes, un listado de **color** y otro de **talle** (cuando corresponda)
   que se filtran entre sí y muestran sin stock las combinaciones agotadas
 - Carrito de compras (persistido en el navegador)
-- Checkout con datos de envío, **código de revendedora obligatorio** (no se
-  puede finalizar la compra sin uno válido, ni desde la interfaz ni llamando
-  a la API directamente) y elección de medio de pago:
-  **tarjeta/Mercado Pago** (si está configurado) o **efectivo/transferencia**
-  coordinando por WhatsApp
+- Checkout simplificado: solo pide el **código de revendedora (obligatorio,
+  no se puede finalizar la compra sin uno válido, ni desde la interfaz ni
+  llamando a la API directamente)**, una nota opcional del pedido y la
+  elección de medio de pago: **tarjeta/Mercado Pago** (si está configurado)
+  o **efectivo/transferencia** coordinando por WhatsApp. El nombre, teléfono
+  y localidad del pedido se toman automáticamente de los datos de la
+  revendedora (ya cargados en `/admin/revendedoras`), porque solo compran
+  ellas.
 - Confirmación de pedido que muestra el estado real del pago (aprobado,
   pendiente, rechazado con botón para reintentar) o el botón de WhatsApp
 

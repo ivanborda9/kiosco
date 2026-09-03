@@ -19,19 +19,14 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
 
       <div className="mb-6 grid gap-4 sm:grid-cols-2">
         <div className="rounded-xl border border-gray-200 bg-white p-4">
-          <h2 className="mb-2 font-semibold text-gray-900">Cliente</h2>
-          <p className="text-sm text-gray-700">{order.customerName}</p>
-          <p className="text-sm text-gray-700">{order.customerPhone}</p>
-          <p className="text-sm text-gray-700">{order.customerAddress}</p>
-          {order.notes && <p className="mt-1 text-sm italic text-gray-500">"{order.notes}"</p>}
-        </div>
-        <div className="rounded-xl border border-gray-200 bg-white p-4">
           <h2 className="mb-2 font-semibold text-gray-900">Revendedora</h2>
           {order.reseller ? (
             <>
               <p className="text-sm text-gray-700">
                 {order.reseller.name} ({order.reseller.code})
               </p>
+              {order.reseller.phone && <p className="text-sm text-gray-700">{order.reseller.phone}</p>}
+              {order.reseller.city && <p className="text-sm text-gray-700">{order.reseller.city}</p>}
               <p className="text-sm text-gray-700">
                 Comisión: {formatPrice(order.commissionAmount)} ({order.reseller.commissionPercent}%)
               </p>
@@ -39,6 +34,10 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
           ) : (
             <p className="text-sm text-gray-500">Venta directa, sin revendedora.</p>
           )}
+        </div>
+        <div className="rounded-xl border border-gray-200 bg-white p-4">
+          <h2 className="mb-2 font-semibold text-gray-900">Nota del pedido</h2>
+          <p className="text-sm text-gray-700">{order.notes || "Sin nota."}</p>
         </div>
         <div className="rounded-xl border border-gray-200 bg-white p-4 sm:col-span-2">
           <h2 className="mb-2 font-semibold text-gray-900">Pago</h2>
