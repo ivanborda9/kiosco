@@ -35,6 +35,12 @@ export async function POST(req: NextRequest) {
   if (items.length === 0) {
     return NextResponse.json({ error: "El carrito está vacío." }, { status: 400 });
   }
+  if (!resellerCode) {
+    return NextResponse.json(
+      { error: "Ingresá el código de tu revendedora para poder finalizar la compra." },
+      { status: 400 }
+    );
+  }
   if (paymentMethod === "MERCADOPAGO" && !isMercadoPagoEnabled()) {
     return NextResponse.json(
       { error: "El pago con Mercado Pago no está disponible en este momento." },
@@ -84,14 +90,14 @@ export async function POST(req: NextRequest) {
         };
       });
 
-      let reseller = null;
-      if (resellerCode) {
-        reseller = await tx.reseller.findFirst({ where: { code: resellerCode, active: true } });
+      const reseller = await tx.reseller.findFirst({ where: { code: resellerCode, active: true } });
+      if (!reseller) {
+        throw new Error("El código de revendedora ingresado no es válido.");
       }
 
-      const discountAmount = reseller ? Math.round(subtotal * (reseller.discountPercent / 100)) : 0;
+      const discountAmount = Math.round(subtotal * (reseller.discountPercent / 100));
       const total = subtotal - discountAmount;
-      const commissionAmount = reseller ? Math.round(total * (reseller.commissionPercent / 100)) : 0;
+      const commissionAmount = Math.round(total * (reseller.commissionPercent / 100));
 
       const createdOrder = await tx.order.create({
         data: {

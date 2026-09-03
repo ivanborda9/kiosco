@@ -65,6 +65,12 @@ export function CheckoutForm({ mercadoPagoEnabled }: { mercadoPagoEnabled: boole
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+
+    if (codeState.status !== "valid") {
+      setError("Ingresá y validá el código de tu revendedora para poder finalizar la compra.");
+      return;
+    }
+
     setSubmitting(true);
     try {
       const res = await fetch("/api/checkout", {
@@ -75,7 +81,7 @@ export function CheckoutForm({ mercadoPagoEnabled }: { mercadoPagoEnabled: boole
           customerPhone,
           customerAddress,
           notes,
-          resellerCode: codeState.status === "valid" ? code : null,
+          resellerCode: code,
           paymentMethod,
           items: items.map((i) => ({
             productId: i.productId,
@@ -157,10 +163,11 @@ export function CheckoutForm({ mercadoPagoEnabled }: { mercadoPagoEnabled: boole
 
         <div className="rounded-lg border border-brand-200 bg-brand-50 p-4">
           <label className="mb-1 block text-sm font-medium text-brand-800">
-            ¿Comprás a través de una revendedora? Ingresá su código
+            Código de tu revendedora (obligatorio)
           </label>
           <div className="flex gap-2">
             <input
+              required
               value={code}
               onChange={(e) => {
                 setCode(e.target.value);
@@ -177,6 +184,9 @@ export function CheckoutForm({ mercadoPagoEnabled }: { mercadoPagoEnabled: boole
               Validar
             </button>
           </div>
+          <p className="mt-2 text-xs text-brand-700">
+            Necesitás el código de una revendedora para poder finalizar la compra.
+          </p>
           {codeState.status === "checking" && (
             <p className="mt-2 text-sm text-brand-700">Validando...</p>
           )}
@@ -238,7 +248,7 @@ export function CheckoutForm({ mercadoPagoEnabled }: { mercadoPagoEnabled: boole
 
         <button
           type="submit"
-          disabled={submitting}
+          disabled={submitting || codeState.status !== "valid"}
           className="rounded-lg bg-brand-600 px-5 py-3 font-semibold text-white hover:bg-brand-700 disabled:bg-gray-300"
         >
           {submitting
@@ -247,6 +257,11 @@ export function CheckoutForm({ mercadoPagoEnabled }: { mercadoPagoEnabled: boole
               ? "Ir a pagar"
               : "Confirmar pedido"}
         </button>
+        {codeState.status !== "valid" && (
+          <p className="text-xs text-gray-500">
+            Validá el código de tu revendedora arriba para poder continuar.
+          </p>
+        )}
       </form>
 
       <div className="h-fit rounded-xl border border-gray-200 bg-white p-5">
