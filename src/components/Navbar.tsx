@@ -8,11 +8,14 @@ export function Navbar({ storeName }: { storeName: string }) {
 
   return (
     <header className="sticky top-0 z-40 border-b border-brand-100 bg-white/90 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-        <Link href="/" className="text-xl font-bold text-brand-700">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-3">
+        <Link
+          href="/"
+          className="font-display text-2xl font-bold italic tracking-wide text-brand-700 sm:text-4xl"
+        >
           {storeName}
         </Link>
-        <nav className="flex items-center gap-6 text-sm font-medium text-gray-700">
+        <nav className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm font-medium text-gray-700">
           <Link href="/" className="hover:text-brand-600">
             Catálogo
           </Link>

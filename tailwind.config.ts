@@ -4,6 +4,9 @@ const config: Config = {
   content: ["./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
+      fontFamily: {
+        display: ["var(--font-display)", "serif"],
+      },
       colors: {
         brand: {
           50: "rgb(var(--brand-50) / <alpha-value>)",

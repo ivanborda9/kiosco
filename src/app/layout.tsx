@@ -1,7 +1,15 @@
 import type { Metadata } from "next";
+import { Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { getSiteSettings } from "@/lib/settings";
 import { generateBrandShades, isValidHexColor, BRAND_SHADE_KEYS } from "@/lib/colors";
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["700", "900"],
+  style: ["italic", "normal"],
+  variable: "--font-display",
+});
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
@@ -21,7 +29,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <head>
         <style>{`:root{${BRAND_SHADE_KEYS.map((key) => `--brand-${key}:${shades[key]};`).join("")}}`}</style>
       </head>
-      <body className="flex min-h-screen flex-col">{children}</body>
+      <body className={`${playfair.variable} flex min-h-screen flex-col`}>{children}</body>
     </html>
   );
 }
