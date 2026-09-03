@@ -59,6 +59,7 @@ export async function registerReseller(formData: FormData) {
         city,
         code,
         passwordHash,
+        commissionPercent: 25,
         active: false,
       },
     });

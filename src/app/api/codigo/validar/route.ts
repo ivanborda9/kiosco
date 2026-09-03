@@ -17,6 +17,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ valid: false, message: "Código no válido." }, { status: 404 });
   }
 
+  if (!reseller.codeActive) {
+    return NextResponse.json(
+      { valid: false, message: "Este código está deshabilitado temporalmente." },
+      { status: 404 }
+    );
+  }
+
   return NextResponse.json({
     valid: true,
     name: reseller.name,

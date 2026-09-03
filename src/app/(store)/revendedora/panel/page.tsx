@@ -44,6 +44,12 @@ export default async function RevendedoraPanelPage() {
           empezar a funcionar en el checkout.
         </p>
       )}
+      {reseller.active && !reseller.codeActive && (
+        <p className="mb-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+          Tu código de descuento está deshabilitado temporalmente por el administrador y no se
+          puede usar en el checkout.
+        </p>
+      )}
 
       <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
         <div className="rounded-xl border border-gray-200 bg-white p-4">
@@ -78,7 +84,9 @@ export default async function RevendedoraPanelPage() {
             {orders.map((o) => (
               <li key={o.id} className="flex items-center justify-between py-3">
                 <div>
-                  <p className="font-medium text-gray-900">{o.customerName}</p>
+                  <p className="font-medium text-gray-900">
+                    Pedido #{o.id.slice(-6).toUpperCase()}
+                  </p>
                   <p className="text-gray-500">{formatDate(o.createdAt)}</p>
                 </div>
                 <div className="text-right">

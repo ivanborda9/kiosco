@@ -85,6 +85,9 @@ export async function POST(req: NextRequest) {
       if (!reseller) {
         throw new Error("El código de revendedora ingresado no es válido.");
       }
+      if (!reseller.codeActive) {
+        throw new Error("Este código de revendedora está deshabilitado temporalmente.");
+      }
 
       const discountAmount = Math.round(subtotal * (reseller.discountPercent / 100));
       const total = subtotal - discountAmount;

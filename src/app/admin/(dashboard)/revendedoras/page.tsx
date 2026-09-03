@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { formatPrice, formatDate } from "@/lib/format";
-import { toggleResellerActive, deleteReseller, markCommissionPaid } from "./actions";
+import { toggleResellerActive, toggleResellerCodeActive, deleteReseller, markCommissionPaid } from "./actions";
 import { ConfirmSubmitButton } from "@/components/admin/ConfirmSubmitButton";
 
 export const dynamic = "force-dynamic";
@@ -38,6 +38,7 @@ export default async function AdminResellersPage() {
               <th className="px-4 py-3">Comisión pendiente</th>
               <th className="px-4 py-3">Último pago</th>
               <th className="px-4 py-3">Estado</th>
+              <th className="px-4 py-3">Código</th>
               <th className="px-4 py-3 text-right">Acciones</th>
             </tr>
           </thead>
@@ -71,6 +72,15 @@ export default async function AdminResellersPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3">
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                        r.codeActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"
+                      }`}
+                    >
+                      {r.codeActive ? "Habilitado" : "Deshabilitado"}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
                     <div className="flex justify-end gap-3">
                       <Link href={`/admin/revendedoras/${r.id}/editar`} className="text-brand-600 hover:underline">
                         Editar
@@ -78,6 +88,11 @@ export default async function AdminResellersPage() {
                       <form action={toggleResellerActive.bind(null, r.id, !r.active)}>
                         <button type="submit" className="text-gray-600 hover:underline">
                           {r.active ? "Desactivar" : "Activar"}
+                        </button>
+                      </form>
+                      <form action={toggleResellerCodeActive.bind(null, r.id, !r.codeActive)}>
+                        <button type="submit" className="text-gray-600 hover:underline">
+                          {r.codeActive ? "Deshabilitar código" : "Habilitar código"}
                         </button>
                       </form>
                       {pending > 0 && (
