@@ -13,6 +13,7 @@ export default function NewResellerPage({ searchParams }: { searchParams: { erro
           name: "",
           email: "",
           phone: "",
+          city: "",
           code: "",
           discountPercent: 10,
           commissionPercent: 15,

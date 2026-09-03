@@ -45,9 +45,10 @@ por cada venta.
 **Panel de revendedoras** (`/revendedora`)
 - Página pública "¿Querés ser revendedora?" con botones para registrarse o
   iniciar sesión
-- Registro con nombre, email, teléfono y contraseña: genera un código de
-  descuento único y queda **pendiente de aprobación** (el admin la activa
-  desde `/admin/revendedoras`)
+- Registro con nombre, email, teléfono, localidad y contraseña: genera un
+  código de descuento único y queda **pendiente de aprobación** (el admin la
+  activa desde `/admin/revendedoras`). La localidad se muestra en el listado
+  de admin para organizar los envíos
 - Panel propio (`/revendedora/panel`) donde cada revendedora ve su código,
   sus ventas, la comisión acumulada desde el primer día y la comisión
   pendiente desde el último pago que le registró el admin

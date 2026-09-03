@@ -41,6 +41,16 @@ export default function RegistroRevendedoraPage({
           <input name="phone" className="w-full rounded-lg border border-gray-300 px-3 py-2" />
         </div>
         <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">Localidad</label>
+          <input
+            name="city"
+            required
+            placeholder="Ej: Rosario, Santa Fe"
+            className="w-full rounded-lg border border-gray-300 px-3 py-2"
+          />
+          <p className="mt-1 text-xs text-gray-400">Para organizar los envíos de tus pedidos.</p>
+        </div>
+        <div>
           <label className="mb-1 block text-sm font-medium text-gray-700">Contraseña</label>
           <input
             name="password"

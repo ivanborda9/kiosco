@@ -27,12 +27,15 @@ export async function registerReseller(formData: FormData) {
     .trim()
     .toLowerCase();
   const phone = String(formData.get("phone") || "").trim();
+  const city = String(formData.get("city") || "").trim();
   const password = String(formData.get("password") || "");
 
-  if (!name || !email || password.length < 6) {
+  if (!name || !email || !city || password.length < 6) {
     redirect(
       "/revendedora/registro?error=" +
-        encodeURIComponent("Completá tu nombre, email y una contraseña de al menos 6 caracteres.")
+        encodeURIComponent(
+          "Completá tu nombre, email, localidad y una contraseña de al menos 6 caracteres."
+        )
     );
   }
 
@@ -53,6 +56,7 @@ export async function registerReseller(formData: FormData) {
         name,
         email,
         phone: phone || null,
+        city,
         code,
         passwordHash,
         active: false,

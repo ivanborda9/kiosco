@@ -44,6 +44,7 @@ model Reseller {
   name              String
   email             String?  @unique
   phone             String?
+  city              String?
   code              String   @unique
   passwordHash      String?
   discountPercent   Float    @default(10)

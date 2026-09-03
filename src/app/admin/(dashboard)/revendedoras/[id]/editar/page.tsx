@@ -16,6 +16,7 @@ export default async function EditResellerPage({ params }: { params: { id: strin
           name: reseller.name,
           email: reseller.email,
           phone: reseller.phone,
+          city: reseller.city,
           code: reseller.code,
           discountPercent: reseller.discountPercent,
           commissionPercent: reseller.commissionPercent,

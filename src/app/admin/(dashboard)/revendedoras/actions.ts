@@ -10,6 +10,7 @@ function parseResellerForm(formData: FormData) {
     name: String(formData.get("name") || "").trim(),
     email: String(formData.get("email") || "").trim() || null,
     phone: String(formData.get("phone") || "").trim() || null,
+    city: String(formData.get("city") || "").trim() || null,
     code: String(formData.get("code") || "")
       .trim()
       .toUpperCase(),

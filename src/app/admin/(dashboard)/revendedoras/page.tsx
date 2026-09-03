@@ -29,6 +29,7 @@ export default async function AdminResellersPage() {
           <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500">
             <tr>
               <th className="px-4 py-3">Nombre</th>
+              <th className="px-4 py-3">Localidad</th>
               <th className="px-4 py-3">Código</th>
               <th className="px-4 py-3">Descuento clienta</th>
               <th className="px-4 py-3">Comisión</th>
@@ -50,6 +51,7 @@ export default async function AdminResellersPage() {
               return (
                 <tr key={r.id}>
                   <td className="px-4 py-3 font-medium text-gray-900">{r.name}</td>
+                  <td className="px-4 py-3 text-gray-600">{r.city || "—"}</td>
                   <td className="px-4 py-3 font-mono text-brand-700">{r.code}</td>
                   <td className="px-4 py-3">{r.discountPercent}%</td>
                   <td className="px-4 py-3">{r.commissionPercent}%</td>
