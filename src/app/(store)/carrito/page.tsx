@@ -29,7 +29,7 @@ export default function CartPage() {
         <h1 className="mb-4 text-2xl font-bold text-gray-900">Tu carrito</h1>
         <div className="flex flex-col divide-y divide-gray-200 rounded-xl border border-gray-200 bg-white">
           {items.map((item) => (
-            <div key={item.productId} className="flex items-center gap-4 p-4">
+            <div key={`${item.productId}-${item.variantId ?? ""}`} className="flex items-center gap-4 p-4">
               <div className="relative h-20 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-brand-50">
                 {item.imageUrl && (
                   <Image src={item.imageUrl} alt={item.name} fill className="object-cover" />
@@ -37,6 +37,7 @@ export default function CartPage() {
               </div>
               <div className="flex-1">
                 <p className="font-medium text-gray-900">{item.name}</p>
+                {item.variantLabel && <p className="text-xs text-gray-500">{item.variantLabel}</p>}
                 <p className="text-sm text-gray-500">{formatPrice(item.price)} c/u</p>
               </div>
               <input
@@ -44,14 +45,16 @@ export default function CartPage() {
                 min={1}
                 max={item.stock}
                 value={item.quantity}
-                onChange={(e) => updateQuantity(item.productId, Number(e.target.value) || 1)}
+                onChange={(e) =>
+                  updateQuantity(item.productId, item.variantId, Number(e.target.value) || 1)
+                }
                 className="w-16 rounded-lg border border-gray-300 px-2 py-1 text-center"
               />
               <span className="w-24 text-right font-semibold">
                 {formatPrice(item.price * item.quantity)}
               </span>
               <button
-                onClick={() => removeItem(item.productId)}
+                onClick={() => removeItem(item.productId, item.variantId)}
                 className="text-sm text-red-500 hover:underline"
               >
                 Quitar

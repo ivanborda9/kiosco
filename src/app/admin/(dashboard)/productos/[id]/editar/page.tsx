@@ -10,7 +10,10 @@ export default async function EditProductPage({ params }: { params: { id: string
   const [product, categories] = await Promise.all([
     prisma.product.findUnique({
       where: { id: params.id },
-      include: { images: { orderBy: { position: "asc" } } },
+      include: {
+        images: { orderBy: { position: "asc" } },
+        variants: { orderBy: { position: "asc" } },
+      },
     }),
     prisma.category.findMany({ orderBy: { position: "asc" } }),
   ]);
@@ -33,6 +36,12 @@ export default async function EditProductPage({ params }: { params: { id: string
         blobEnabled={isBlobConfigured()}
         existingImages={product.images.map((img) => ({ id: img.id, url: img.url }))}
         categories={categories.map((c) => c.name)}
+        initialVariants={product.variants.map((v) => ({
+          id: v.id,
+          color: v.color ?? "",
+          size: v.size ?? "",
+          stock: v.stock,
+        }))}
       />
     </div>
   );

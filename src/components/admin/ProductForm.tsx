@@ -1,3 +1,5 @@
+import { VariantsEditor, type VariantRow } from "./VariantsEditor";
+
 type ProductFormValues = {
   name: string;
   description: string;
@@ -16,6 +18,7 @@ export function ProductForm({
   blobEnabled,
   existingImages,
   categories,
+  initialVariants = [],
 }: {
   action: (formData: FormData) => void;
   initial?: ProductFormValues;
@@ -23,6 +26,7 @@ export function ProductForm({
   blobEnabled: boolean;
   existingImages?: GalleryImage[];
   categories: string[];
+  initialVariants?: VariantRow[];
 }) {
   const categoryOptions =
     initial?.category && !categories.includes(initial.category)
@@ -63,7 +67,9 @@ export function ProductForm({
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Stock</label>
+          <label className="mb-1 block text-sm font-medium text-gray-700">
+            Stock {initialVariants.length > 0 ? "(sin variantes)" : ""}
+          </label>
           <input
             name="stock"
             type="number"
@@ -73,8 +79,14 @@ export function ProductForm({
             defaultValue={initial?.stock}
             className="w-full rounded-lg border border-gray-300 px-3 py-2"
           />
+          <p className="mt-1 text-xs text-gray-400">
+            Se ignora si cargás variantes de color/talle abajo.
+          </p>
         </div>
       </div>
+
+      <VariantsEditor initial={initialVariants} />
+
       <div>
         <label className="mb-1 block text-sm font-medium text-gray-700">Categoría</label>
         {categoryOptions.length > 0 ? (

@@ -77,7 +77,11 @@ export function CheckoutForm({ mercadoPagoEnabled }: { mercadoPagoEnabled: boole
           notes,
           resellerCode: codeState.status === "valid" ? code : null,
           paymentMethod,
-          items: items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
+          items: items.map((i) => ({
+            productId: i.productId,
+            variantId: i.variantId,
+            quantity: i.quantity,
+          })),
         }),
       });
       const data = await res.json();

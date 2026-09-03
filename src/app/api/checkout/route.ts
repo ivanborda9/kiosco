@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createOrderPreference, isMercadoPagoEnabled } from "@/lib/mercadopago";
 
-type CheckoutItem = { productId: string; quantity: number };
+type CheckoutItem = { productId: string; variantId: string | null; quantity: number };
 
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
@@ -19,7 +19,11 @@ export async function POST(req: NextRequest) {
   const items: CheckoutItem[] = Array.isArray(body?.items)
     ? body.items
         .filter((i: any) => typeof i?.productId === "string" && Number(i?.quantity) > 0)
-        .map((i: any) => ({ productId: i.productId, quantity: Math.floor(Number(i.quantity)) }))
+        .map((i: any) => ({
+          productId: i.productId,
+          variantId: typeof i?.variantId === "string" && i.variantId ? i.variantId : null,
+          quantity: Math.floor(Number(i.quantity)),
+        }))
     : [];
 
   if (!customerName || !customerPhone || !customerAddress) {
@@ -45,19 +49,36 @@ export async function POST(req: NextRequest) {
       });
       const productMap = new Map(products.map((p) => [p.id, p]));
 
+      const variantIds = items.map((i) => i.variantId).filter((id): id is string => Boolean(id));
+      const variants = variantIds.length
+        ? await tx.productVariant.findMany({ where: { id: { in: variantIds } } })
+        : [];
+      const variantMap = new Map(variants.map((v) => [v.id, v]));
+
       let subtotal = 0;
       const orderItemsData = items.map((item) => {
         const product = productMap.get(item.productId);
         if (!product || !product.active) {
           throw new Error(`Producto no disponible: ${item.productId}`);
         }
-        if (product.stock < item.quantity) {
+
+        const variant = item.variantId ? variantMap.get(item.variantId) : null;
+        if (item.variantId && (!variant || variant.productId !== product.id)) {
+          throw new Error(`La variante elegida de "${product.name}" ya no está disponible.`);
+        }
+
+        const availableStock = variant ? variant.stock : product.stock;
+        if (availableStock < item.quantity) {
           throw new Error(`Sin stock suficiente de "${product.name}".`);
         }
+
         subtotal += product.price * item.quantity;
         return {
           productId: product.id,
           productName: product.name,
+          variantId: variant?.id ?? null,
+          variantColor: variant?.color ?? null,
+          variantSize: variant?.size ?? null,
           price: product.price,
           quantity: item.quantity,
         };
@@ -90,10 +111,17 @@ export async function POST(req: NextRequest) {
       });
 
       for (const item of orderItemsData) {
-        await tx.product.update({
-          where: { id: item.productId },
-          data: { stock: { decrement: item.quantity } },
-        });
+        if (item.variantId) {
+          await tx.productVariant.update({
+            where: { id: item.variantId },
+            data: { stock: { decrement: item.quantity } },
+          });
+        } else {
+          await tx.product.update({
+            where: { id: item.productId },
+            data: { stock: { decrement: item.quantity } },
+          });
+        }
       }
 
       return createdOrder;

@@ -13,6 +13,7 @@ export type ProductCardData = {
   imageUrl: string | null;
   category: string;
   stock: number;
+  hasVariants: boolean;
 };
 
 export function ProductCard({ product }: { product: ProductCardData }) {
@@ -23,6 +24,8 @@ export function ProductCard({ product }: { product: ProductCardData }) {
   const handleAdd = () => {
     addItem({
       productId: product.id,
+      variantId: null,
+      variantLabel: null,
       name: product.name,
       price: product.price,
       imageUrl: product.imageUrl,
@@ -55,13 +58,24 @@ export function ProductCard({ product }: { product: ProductCardData }) {
           {product.name}
         </Link>
         <span className="mt-1 text-lg font-bold text-gray-900">{formatPrice(product.price)}</span>
-        <button
-          onClick={handleAdd}
-          disabled={outOfStock}
-          className="mt-2 rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-gray-300"
-        >
-          {outOfStock ? "Sin stock" : added ? "¡Agregado!" : "Agregar al carrito"}
-        </button>
+        {product.hasVariants ? (
+          <Link
+            href={`/producto/${product.id}`}
+            className={`mt-2 rounded-lg px-3 py-2 text-center text-sm font-semibold text-white transition ${
+              outOfStock ? "pointer-events-none bg-gray-300" : "bg-brand-600 hover:bg-brand-700"
+            }`}
+          >
+            {outOfStock ? "Sin stock" : "Elegir color / talle"}
+          </Link>
+        ) : (
+          <button
+            onClick={handleAdd}
+            disabled={outOfStock}
+            className="mt-2 rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-gray-300"
+          >
+            {outOfStock ? "Sin stock" : added ? "¡Agregado!" : "Agregar al carrito"}
+          </button>
+        )}
       </div>
     </div>
   );

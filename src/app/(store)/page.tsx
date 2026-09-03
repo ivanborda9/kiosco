@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { ProductCard } from "@/components/ProductCard";
 import { BannerCarousel } from "@/components/BannerCarousel";
 import { getSiteSettings } from "@/lib/settings";
+import { totalStock } from "@/lib/stock";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,7 @@ export default async function HomePage({
     prisma.product.findMany({
       where: { active: true, ...(categoria ? { category: categoria } : {}) },
       orderBy: { createdAt: "desc" },
+      include: { variants: true },
     }),
     prisma.product.findMany({
       where: { active: true },
@@ -86,7 +88,8 @@ export default async function HomePage({
                 price: p.price,
                 imageUrl: p.imageUrl,
                 category: p.category,
-                stock: p.stock,
+                stock: totalStock(p),
+                hasVariants: p.variants.length > 0,
               }}
             />
           ))}

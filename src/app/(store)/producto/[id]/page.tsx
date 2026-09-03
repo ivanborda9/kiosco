@@ -9,7 +9,10 @@ export const dynamic = "force-dynamic";
 export default async function ProductPage({ params }: { params: { id: string } }) {
   const product = await prisma.product.findUnique({
     where: { id: params.id },
-    include: { images: { orderBy: { position: "asc" } } },
+    include: {
+      images: { orderBy: { position: "asc" } },
+      variants: { orderBy: { position: "asc" } },
+    },
   });
 
   if (!product || !product.active) {
@@ -38,6 +41,12 @@ export default async function ProductPage({ params }: { params: { id: string } }
               imageUrl: product.imageUrl,
               stock: product.stock,
             }}
+            variants={product.variants.map((v) => ({
+              id: v.id,
+              color: v.color,
+              size: v.size,
+              stock: v.stock,
+            }))}
           />
         </div>
         <p className="mt-6 rounded-lg bg-brand-50 px-4 py-3 text-sm text-brand-700">

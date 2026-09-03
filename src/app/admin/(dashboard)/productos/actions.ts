@@ -16,6 +16,49 @@ function parseProductForm(formData: FormData) {
   };
 }
 
+type ParsedVariant = { id?: string; color: string | null; size: string | null; stock: number };
+
+function parseVariantsForm(formData: FormData): ParsedVariant[] {
+  let parsed: unknown[] = [];
+  try {
+    parsed = JSON.parse(String(formData.get("variantsJson") || "[]"));
+  } catch {
+    parsed = [];
+  }
+  if (!Array.isArray(parsed)) return [];
+  return parsed
+    .map((v: any) => ({
+      id: typeof v?.id === "string" && v.id ? v.id : undefined,
+      color: typeof v?.color === "string" ? v.color.trim() : "",
+      size: typeof v?.size === "string" ? v.size.trim() : "",
+      stock: Math.max(0, Math.floor(Number(v?.stock) || 0)),
+    }))
+    .filter((v) => v.color || v.size)
+    .map((v) => ({ id: v.id, color: v.color || null, size: v.size || null, stock: v.stock }));
+}
+
+async function syncVariants(productId: string, variants: ParsedVariant[]) {
+  const existing = await prisma.productVariant.findMany({ where: { productId } });
+  const incomingIds = new Set(variants.filter((v) => v.id).map((v) => v.id));
+  const toDelete = existing.filter((v) => !incomingIds.has(v.id));
+  if (toDelete.length > 0) {
+    await prisma.productVariant.deleteMany({ where: { id: { in: toDelete.map((v) => v.id) } } });
+  }
+  for (let i = 0; i < variants.length; i++) {
+    const v = variants[i];
+    if (v.id) {
+      await prisma.productVariant.update({
+        where: { id: v.id },
+        data: { color: v.color, size: v.size, stock: v.stock, position: i },
+      });
+    } else {
+      await prisma.productVariant.create({
+        data: { productId, color: v.color, size: v.size, stock: v.stock, position: i },
+      });
+    }
+  }
+}
+
 function getUploadedFile(formData: FormData, field: string): File | null {
   const file = formData.get(field);
   return file instanceof File && file.size > 0 ? file : null;
@@ -30,6 +73,11 @@ function getUploadedFiles(formData: FormData, field: string): File[] {
 export async function createProduct(formData: FormData) {
   const data = parseProductForm(formData);
   const product = await prisma.product.create({ data });
+
+  const variants = parseVariantsForm(formData);
+  if (variants.length > 0) {
+    await syncVariants(product.id, variants);
+  }
 
   if (isBlobConfigured()) {
     const imageFile = getUploadedFile(formData, "imageFile");
@@ -61,6 +109,9 @@ export async function updateProduct(id: string, formData: FormData) {
   }
 
   await prisma.product.update({ where: { id }, data });
+
+  const variants = parseVariantsForm(formData);
+  await syncVariants(id, variants);
 
   if (isBlobConfigured()) {
     const deleteIds = formData.getAll("deleteImageIds").map(String).filter(Boolean);

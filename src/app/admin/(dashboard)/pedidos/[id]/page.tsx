@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { formatPrice, formatDate, ORDER_STATUSES, ORDER_STATUS_LABELS } from "@/lib/format";
+import { formatPrice, formatDate, formatVariantLabel, ORDER_STATUSES, ORDER_STATUS_LABELS } from "@/lib/format";
 import { updateOrderStatus } from "../actions";
 
 export default async function AdminOrderDetailPage({ params }: { params: { id: string } }) {
@@ -73,14 +73,18 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
       <div className="mb-6 rounded-xl border border-gray-200 bg-white p-4">
         <h2 className="mb-3 font-semibold text-gray-900">Productos</h2>
         <ul className="flex flex-col divide-y divide-gray-100 text-sm">
-          {order.items.map((item) => (
-            <li key={item.id} className="flex justify-between py-2">
-              <span>
-                {item.quantity}x {item.productName}
-              </span>
-              <span>{formatPrice(item.price * item.quantity)}</span>
-            </li>
-          ))}
+          {order.items.map((item) => {
+            const variantLabel = formatVariantLabel(item.variantColor, item.variantSize);
+            return (
+              <li key={item.id} className="flex justify-between py-2">
+                <span>
+                  {item.quantity}x {item.productName}
+                  {variantLabel && <span className="text-gray-500"> ({variantLabel})</span>}
+                </span>
+                <span>{formatPrice(item.price * item.quantity)}</span>
+              </li>
+            );
+          })}
         </ul>
         <div className="mt-3 flex justify-between border-t border-gray-200 pt-2 text-sm text-gray-700">
           <span>Subtotal</span>

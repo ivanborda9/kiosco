@@ -13,19 +13,32 @@ export async function updateOrderStatus(id: string, formData: FormData) {
     if (!order || order.status === status) return;
 
     // Cancelar libera el stock reservado; reactivar un pedido cancelado lo vuelve a reservar.
+    // Si la variante ya no existe (se borró desde el admin), no hay nada que ajustar.
     if (status === "CANCELADO" && order.status !== "CANCELADO") {
       for (const item of order.items) {
-        await tx.product.update({
-          where: { id: item.productId },
-          data: { stock: { increment: item.quantity } },
-        });
+        if (item.variantId) {
+          await tx.productVariant
+            .update({ where: { id: item.variantId }, data: { stock: { increment: item.quantity } } })
+            .catch(() => {});
+        } else {
+          await tx.product.update({
+            where: { id: item.productId },
+            data: { stock: { increment: item.quantity } },
+          });
+        }
       }
     } else if (status !== "CANCELADO" && order.status === "CANCELADO") {
       for (const item of order.items) {
-        await tx.product.update({
-          where: { id: item.productId },
-          data: { stock: { decrement: item.quantity } },
-        });
+        if (item.variantId) {
+          await tx.productVariant
+            .update({ where: { id: item.variantId }, data: { stock: { decrement: item.quantity } } })
+            .catch(() => {});
+        } else {
+          await tx.product.update({
+            where: { id: item.productId },
+            data: { stock: { decrement: item.quantity } },
+          });
+        }
       }
     }
 

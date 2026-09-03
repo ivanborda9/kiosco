@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, formatVariantLabel } from "@/lib/format";
 import { buildWhatsappOrderLink } from "@/lib/whatsapp";
 import { getSiteSettings } from "@/lib/settings";
 import { getMercadoPagoPayment, mapMercadoPagoStatus } from "@/lib/mercadopago";
@@ -92,14 +92,18 @@ export default async function OrderConfirmationPage({
 
       <div className="mt-6 rounded-xl border border-gray-200 bg-white p-5 text-left">
         <ul className="flex flex-col gap-2 text-sm">
-          {order.items.map((i) => (
-            <li key={i.id} className="flex justify-between text-gray-700">
-              <span>
-                {i.quantity}x {i.productName}
-              </span>
-              <span>{formatPrice(i.price * i.quantity)}</span>
-            </li>
-          ))}
+          {order.items.map((i) => {
+            const variantLabel = formatVariantLabel(i.variantColor, i.variantSize);
+            return (
+              <li key={i.id} className="flex justify-between text-gray-700">
+                <span>
+                  {i.quantity}x {i.productName}
+                  {variantLabel && <span className="text-gray-500"> ({variantLabel})</span>}
+                </span>
+                <span>{formatPrice(i.price * i.quantity)}</span>
+              </li>
+            );
+          })}
         </ul>
         <div className="mt-3 flex justify-between border-t border-gray-200 pt-2 text-gray-700">
           <span>Subtotal</span>

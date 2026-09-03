@@ -15,7 +15,8 @@ por cada venta.
 
 **Sitio público**
 - Catálogo con filtro por categoría
-- Ficha de producto con selector de cantidad
+- Ficha de producto con selector de cantidad y, si el producto tiene
+  variantes, selector de color/talle con el stock de cada opción
 - Carrito de compras (persistido en el navegador)
 - Checkout con datos de envío, campo para código de revendedora y elección
   de medio de pago: **tarjeta/Mercado Pago** (si está configurado) o
@@ -25,7 +26,10 @@ por cada venta.
 
 **Panel de administración** (`/admin`)
 - Resumen de ventas y comisiones generadas
-- ABM de productos (nombre, precio, stock, categoría, imagen, alta/baja)
+- ABM de productos (nombre, precio, stock, categoría, imagen, alta/baja).
+  Opcionalmente se le pueden cargar **variantes de color y/o talle**, cada
+  una con su propio stock; si un producto tiene variantes, el stock general
+  se ignora y las clientas eligen la variante en la ficha del producto
 - **Categorías** (`/admin/categorias`): crear o eliminar las categorías que después
   se eligen al cargar un producto y que aparecen como filtro en el catálogo. No
   se puede eliminar una categoría que todavía tiene productos cargados.

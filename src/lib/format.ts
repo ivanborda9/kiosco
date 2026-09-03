@@ -20,6 +20,16 @@ export function formatDate(date: Date | string): string {
   return dateFormatter.format(new Date(date));
 }
 
+export function formatVariantLabel(
+  color?: string | null,
+  size?: string | null
+): string | null {
+  const parts: string[] = [];
+  if (color) parts.push(color);
+  if (size) parts.push(`Talle ${size}`);
+  return parts.length > 0 ? parts.join(" / ") : null;
+}
+
 export const ORDER_STATUSES = ["PENDIENTE", "CONFIRMADO", "ENVIADO", "CANCELADO"] as const;
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
 

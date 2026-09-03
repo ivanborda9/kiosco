@@ -1,13 +1,17 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/format";
+import { totalStock } from "@/lib/stock";
 import { toggleProductActive, deleteProduct } from "./actions";
 import { ConfirmSubmitButton } from "@/components/admin/ConfirmSubmitButton";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminProductsPage() {
-  const products = await prisma.product.findMany({ orderBy: { createdAt: "desc" } });
+  const products = await prisma.product.findMany({
+    orderBy: { createdAt: "desc" },
+    include: { variants: true },
+  });
 
   return (
     <div>
@@ -39,7 +43,14 @@ export default async function AdminProductsPage() {
                 <td className="px-4 py-3 font-medium text-gray-900">{p.name}</td>
                 <td className="px-4 py-3 text-gray-600">{p.category}</td>
                 <td className="px-4 py-3">{formatPrice(p.price)}</td>
-                <td className="px-4 py-3">{p.stock}</td>
+                <td className="px-4 py-3">
+                  {totalStock(p)}
+                  {p.variants.length > 0 && (
+                    <span className="ml-1 text-xs text-gray-400">
+                      ({p.variants.length} variante{p.variants.length === 1 ? "" : "s"})
+                    </span>
+                  )}
+                </td>
                 <td className="px-4 py-3">
                   <span
                     className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
