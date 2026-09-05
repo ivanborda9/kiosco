@@ -20,7 +20,15 @@ export default async function AdminOrdersPage() {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">Pedidos</h1>
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-900">Pedidos</h1>
+        <Link
+          href="/admin/pedidos/nueva"
+          className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
+        >
+          + Registrar venta
+        </Link>
+      </div>
 
       <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
         <table className="min-w-full divide-y divide-gray-200 text-sm">
@@ -61,6 +69,8 @@ export default async function AdminOrdersPage() {
                           ? "Rechazado"
                           : "Pendiente"}
                     </span>
+                  ) : o.paymentMethod === "MOSTRADOR" ? (
+                    <span className="text-gray-500">Venta directa</span>
                   ) : (
                     <span className="text-gray-500">WhatsApp</span>
                   )}

@@ -25,7 +25,7 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
       <div className="mb-6 rounded-xl border border-gray-200 bg-white p-4">
         <h2 className="mb-2 font-semibold text-gray-900">Datos de envío</h2>
         <p className="text-sm text-gray-700">{order.customerName}</p>
-        <p className="text-sm text-gray-700">{order.customerPhone}</p>
+        {order.customerPhone && <p className="text-sm text-gray-700">{order.customerPhone}</p>}
         <p className="text-sm text-gray-700">{order.customerAddress}</p>
       </div>
 
@@ -57,7 +57,11 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
           <h2 className="mb-2 font-semibold text-gray-900">Pago</h2>
           <p className="text-sm text-gray-700">
             Método:{" "}
-            {order.paymentMethod === "MERCADOPAGO" ? "Mercado Pago" : "Efectivo / transferencia (WhatsApp)"}
+            {order.paymentMethod === "MERCADOPAGO"
+              ? "Mercado Pago"
+              : order.paymentMethod === "MOSTRADOR"
+                ? "Venta directa (mostrador)"
+                : "Efectivo / transferencia (WhatsApp)"}
           </p>
           {order.paymentMethod === "MERCADOPAGO" && (
             <p className="text-sm text-gray-700">

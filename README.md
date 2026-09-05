@@ -123,10 +123,12 @@ de WhatsApp se configuran desde `/admin/configuracion`, no acá.
 Si configurás `EMPLOYEE_USERNAME` y `EMPLOYEE_PASSWORD`, esas credenciales
 también entran por `/admin/login`, pero con acceso limitado únicamente a
 `/admin/pedidos`: puede ver la lista de pedidos, sus datos de envío
-(nombre, teléfono, dirección) y cambiar el estado del pedido (a preparación,
-enviado, entregado, etc). No puede ver ni acceder a Resumen, Reportes,
-Productos, Categorías, Revendedoras, Banners ni Configuración, y en el
-detalle de un pedido no ve la comisión de la revendedora. Tampoco puede
+(nombre, teléfono, dirección), cambiar el estado del pedido (a preparación,
+enviado, entregado, etc) y registrar ventas hechas en persona desde
+"+ Registrar venta" (elige los productos/variantes vendidos y la cantidad,
+así el stock se descuenta correctamente). No puede ver ni acceder a Resumen,
+Reportes, Productos, Categorías, Revendedoras, Banners ni Configuración, y en
+el detalle de un pedido no ve la comisión de la revendedora. Tampoco puede
 eliminar pedidos cancelados. Si dejás esas dos variables vacías, ese acceso
 directamente no existe.
 
