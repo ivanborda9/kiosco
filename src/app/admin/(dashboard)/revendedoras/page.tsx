@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { formatPrice, formatDate } from "@/lib/format";
+import { formatPrice } from "@/lib/format";
 import { buildCostMap, buildResellerStats } from "@/lib/reports";
 import { toggleResellerActive, toggleResellerDiscountActive, deleteReseller, markCommissionPaid } from "./actions";
 import { ConfirmSubmitButton } from "@/components/admin/ConfirmSubmitButton";
@@ -81,13 +81,9 @@ export default async function AdminResellersPage({
               <th className="px-4 py-3">Nombre</th>
               <th className="px-4 py-3">Localidad</th>
               <th className="px-4 py-3">Código</th>
-              <th className="px-4 py-3">Descuento clienta</th>
-              <th className="px-4 py-3">Comisión</th>
               <th className="px-4 py-3">Ventas</th>
-              <th className="px-4 py-3">Comisión total</th>
-              <th className="px-4 py-3">Comisión pendiente</th>
+              <th className="px-4 py-3">Ventas totales</th>
               <th className="px-4 py-3">Ganancia generada</th>
-              <th className="px-4 py-3">Último pago</th>
               <th className="px-4 py-3">Estado</th>
               <th className="px-4 py-3 text-right">Acciones</th>
             </tr>
@@ -102,25 +98,10 @@ export default async function AdminResellersPage({
                 </td>
                 <td className="px-4 py-3 text-gray-600">{r.city || "—"}</td>
                 <td className="px-4 py-3 font-mono text-brand-700">{r.code}</td>
-                <td className="px-4 py-3">
-                  {r.discountPercent}%{" "}
-                  {!r.discountActive && (
-                    <span className="ml-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-600">
-                      Deshabilitado
-                    </span>
-                  )}
-                </td>
-                <td className="px-4 py-3">{r.commissionPercent}%</td>
                 <td className="px-4 py-3">{stats.salesCount}</td>
-                <td className="px-4 py-3 font-semibold">{formatPrice(stats.commissionEarned)}</td>
-                <td className="px-4 py-3 font-semibold text-brand-700">
-                  {formatPrice(stats.pendingCommission)}
-                </td>
+                <td className="px-4 py-3">{formatPrice(stats.totalSales)}</td>
                 <td className="px-4 py-3 font-semibold text-gray-700">
                   {formatPrice(stats.netProfitGenerated)}
-                </td>
-                <td className="px-4 py-3 text-xs text-gray-500">
-                  {r.lastPayoutAt ? formatDate(r.lastPayoutAt) : "Nunca"}
                 </td>
                 <td className="px-4 py-3">
                   <span
