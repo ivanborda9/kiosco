@@ -54,7 +54,16 @@ por cada venta.
   puede **habilitar/deshabilitar el descuento para la clienta** de forma
   independiente de la cuenta y del código: si se deshabilita, el código
   sigue funcionando y sigue generando comisión para la revendedora, solo
-  que sin aplicarle descuento a la compra
+  que sin aplicarle descuento a la compra. El listado se puede **ordenar
+  por más ventas, más ganancia generada o localidad**, y cada nombre lleva
+  a una **página de detalle** con sus artículos vendidos, monto total y
+  ganancia generada para el negocio
+- **Reportes** (`/admin/reportes`): ventas y ganancia neta de hoy, los
+  últimos 7 y 30 días, tabla de ventas por día (últimas 2 semanas) y por
+  mes, ranking de productos más vendidos y ranking de revendedoras por
+  ganancia generada. La ganancia neta = ventas − costo de los productos
+  vendidos (usando el precio de costo cargado en cada uno) − comisión
+  pagada a la revendedora
 - Listado de pedidos con detalle y cambio de estado (pendiente, confirmado,
   enviado, cancelado); los pedidos cancelados se pueden eliminar de la lista
 - **Banners** (`/admin/banners`): carrusel de banners para la home, subiendo

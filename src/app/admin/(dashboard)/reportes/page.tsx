@@ -1,0 +1,271 @@
+import Link from "next/link";
+import { prisma } from "@/lib/prisma";
+import { formatPrice } from "@/lib/format";
+import {
+  buildCostMap,
+  orderNetProfit,
+  startOfDay,
+  daysAgo,
+  dayKey,
+  monthKey,
+} from "@/lib/reports";
+
+export const dynamic = "force-dynamic";
+
+export default async function AdminReportsPage() {
+  const [orders, products] = await Promise.all([
+    prisma.order.findMany({
+      where: { status: { not: "CANCELADO" } },
+      include: { items: true, reseller: true },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.product.findMany({ select: { id: true, category: true, costPrice: true } }),
+  ]);
+
+  const costMap = buildCostMap(products);
+  const productCategory = new Map(products.map((p) => [p.id, p.category]));
+
+  function statsForRange(from: Date) {
+    const filtered = orders.filter((o) => o.createdAt >= from);
+    return {
+      pedidos: filtered.length,
+      ventas: filtered.reduce((sum, o) => sum + o.total, 0),
+      ganancia: filtered.reduce((sum, o) => sum + orderNetProfit(o, costMap), 0),
+    };
+  }
+
+  const hoy = statsForRange(startOfDay(new Date()));
+  const ultimos7 = statsForRange(daysAgo(6));
+  const ultimos30 = statsForRange(daysAgo(29));
+
+  // Ventas por día (últimos 14 días)
+  const dailyMap = new Map<string, { pedidos: number; ventas: number; ganancia: number }>();
+  const cutoff14 = daysAgo(13);
+  for (const o of orders) {
+    if (o.createdAt < cutoff14) continue;
+    const key = dayKey(o.createdAt);
+    const entry = dailyMap.get(key) ?? { pedidos: 0, ventas: 0, ganancia: 0 };
+    entry.pedidos += 1;
+    entry.ventas += o.total;
+    entry.ganancia += orderNetProfit(o, costMap);
+    dailyMap.set(key, entry);
+  }
+  const dailyRows = Array.from(dailyMap.entries()).sort((a, b) => b[0].localeCompare(a[0]));
+
+  // Ventas por mes (todo el historial)
+  const monthlyMap = new Map<string, { pedidos: number; ventas: number; ganancia: number }>();
+  for (const o of orders) {
+    const key = monthKey(o.createdAt);
+    const entry = monthlyMap.get(key) ?? { pedidos: 0, ventas: 0, ganancia: 0 };
+    entry.pedidos += 1;
+    entry.ventas += o.total;
+    entry.ganancia += orderNetProfit(o, costMap);
+    monthlyMap.set(key, entry);
+  }
+  const monthlyRows = Array.from(monthlyMap.entries()).sort((a, b) => b[0].localeCompare(a[0]));
+
+  // Productos más vendidos
+  const productAgg = new Map<
+    string,
+    { name: string; category: string; quantity: number; revenue: number; cost: number }
+  >();
+  for (const o of orders) {
+    for (const item of o.items) {
+      const entry = productAgg.get(item.productId) ?? {
+        name: item.productName,
+        category: productCategory.get(item.productId) ?? "—",
+        quantity: 0,
+        revenue: 0,
+        cost: 0,
+      };
+      entry.quantity += item.quantity;
+      entry.revenue += item.price * item.quantity;
+      entry.cost += (costMap.get(item.productId) ?? 0) * item.quantity;
+      productAgg.set(item.productId, entry);
+    }
+  }
+  const topProducts = Array.from(productAgg.values())
+    .sort((a, b) => b.quantity - a.quantity)
+    .slice(0, 15);
+
+  // Ranking de revendedoras por ganancia neta generada
+  const resellerAgg = new Map<
+    string,
+    { id: string; name: string; code: string; pedidos: number; ventas: number; ganancia: number }
+  >();
+  for (const o of orders) {
+    if (!o.reseller) continue;
+    const entry = resellerAgg.get(o.reseller.id) ?? {
+      id: o.reseller.id,
+      name: o.reseller.name,
+      code: o.reseller.code,
+      pedidos: 0,
+      ventas: 0,
+      ganancia: 0,
+    };
+    entry.pedidos += 1;
+    entry.ventas += o.total;
+    entry.ganancia += orderNetProfit(o, costMap);
+    resellerAgg.set(o.reseller.id, entry);
+  }
+  const resellerRanking = Array.from(resellerAgg.values())
+    .sort((a, b) => b.ganancia - a.ganancia)
+    .slice(0, 10);
+
+  return (
+    <div>
+      <h1 className="mb-1 text-2xl font-bold text-gray-900">Reportes</h1>
+      <p className="mb-6 text-sm text-gray-500">
+        La ganancia neta se calcula como ventas − costo de los productos (según el precio de
+        costo cargado en cada uno; los que no tienen costo cargado se cuentan sin costo) −
+        comisión pagada a la revendedora.
+      </p>
+
+      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <RangeCard title="Hoy" stats={hoy} />
+        <RangeCard title="Últimos 7 días" stats={ultimos7} />
+        <RangeCard title="Últimos 30 días" stats={ultimos30} />
+      </div>
+
+      <div className="mb-8 grid gap-6 lg:grid-cols-2">
+        <section className="rounded-xl border border-gray-200 bg-white p-5">
+          <h2 className="mb-3 font-bold text-gray-900">Ventas por día (últimos 14 días)</h2>
+          {dailyRows.length === 0 ? (
+            <p className="text-sm text-gray-500">Sin ventas todavía.</p>
+          ) : (
+            <table className="w-full text-sm">
+              <thead className="text-left text-xs uppercase text-gray-500">
+                <tr>
+                  <th className="pb-2">Fecha</th>
+                  <th className="pb-2">Pedidos</th>
+                  <th className="pb-2">Ventas</th>
+                  <th className="pb-2">Ganancia</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {dailyRows.map(([date, s]) => (
+                  <tr key={date}>
+                    <td className="py-1.5">{date}</td>
+                    <td className="py-1.5">{s.pedidos}</td>
+                    <td className="py-1.5">{formatPrice(s.ventas)}</td>
+                    <td className="py-1.5 text-brand-700">{formatPrice(s.ganancia)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </section>
+
+        <section className="rounded-xl border border-gray-200 bg-white p-5">
+          <h2 className="mb-3 font-bold text-gray-900">Ventas por mes</h2>
+          {monthlyRows.length === 0 ? (
+            <p className="text-sm text-gray-500">Sin ventas todavía.</p>
+          ) : (
+            <table className="w-full text-sm">
+              <thead className="text-left text-xs uppercase text-gray-500">
+                <tr>
+                  <th className="pb-2">Mes</th>
+                  <th className="pb-2">Pedidos</th>
+                  <th className="pb-2">Ventas</th>
+                  <th className="pb-2">Ganancia</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {monthlyRows.map(([month, s]) => (
+                  <tr key={month}>
+                    <td className="py-1.5">{month}</td>
+                    <td className="py-1.5">{s.pedidos}</td>
+                    <td className="py-1.5">{formatPrice(s.ventas)}</td>
+                    <td className="py-1.5 text-brand-700">{formatPrice(s.ganancia)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </section>
+      </div>
+
+      <div className="mb-8 rounded-xl border border-gray-200 bg-white p-5">
+        <h2 className="mb-3 font-bold text-gray-900">Productos más vendidos</h2>
+        {topProducts.length === 0 ? (
+          <p className="text-sm text-gray-500">Sin ventas todavía.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="text-left text-xs uppercase text-gray-500">
+                <tr>
+                  <th className="pb-2">Producto</th>
+                  <th className="pb-2">Categoría</th>
+                  <th className="pb-2">Cantidad</th>
+                  <th className="pb-2">Monto vendido</th>
+                  <th className="pb-2">Ganancia</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {topProducts.map((p, i) => (
+                  <tr key={i}>
+                    <td className="py-1.5 font-medium text-gray-900">{p.name}</td>
+                    <td className="py-1.5 text-gray-500">{p.category}</td>
+                    <td className="py-1.5">{p.quantity}</td>
+                    <td className="py-1.5">{formatPrice(p.revenue)}</td>
+                    <td className="py-1.5 text-brand-700">{formatPrice(p.revenue - p.cost)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      <div className="rounded-xl border border-gray-200 bg-white p-5">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="font-bold text-gray-900">Ranking de revendedoras por ganancia generada</h2>
+          <Link href="/admin/revendedoras" className="text-sm text-brand-600 hover:underline">
+            Ver todas
+          </Link>
+        </div>
+        {resellerRanking.length === 0 ? (
+          <p className="text-sm text-gray-500">Sin ventas todavía.</p>
+        ) : (
+          <ul className="flex flex-col divide-y divide-gray-100 text-sm">
+            {resellerRanking.map((r) => (
+              <li key={r.id} className="flex items-center justify-between py-2">
+                <div>
+                  <Link
+                    href={`/admin/revendedoras/${r.id}`}
+                    className="font-medium text-gray-900 hover:text-brand-700 hover:underline"
+                  >
+                    {r.name}
+                  </Link>
+                  <p className="text-gray-500">
+                    Código {r.code} · {r.pedidos} venta(s) · {formatPrice(r.ventas)} vendidos
+                  </p>
+                </div>
+                <p className="font-semibold text-brand-700">{formatPrice(r.ganancia)}</p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function RangeCard({
+  title,
+  stats,
+}: {
+  title: string;
+  stats: { pedidos: number; ventas: number; ganancia: number };
+}) {
+  return (
+    <div className="rounded-xl border border-gray-200 bg-white p-4">
+      <p className="text-xs uppercase tracking-wide text-gray-500">{title}</p>
+      <p className="mt-1 text-xl font-bold text-gray-900">{formatPrice(stats.ventas)}</p>
+      <p className="mt-1 text-sm text-gray-500">{stats.pedidos} pedido(s)</p>
+      <p className="mt-1 text-sm font-semibold text-brand-700">
+        Ganancia neta: {formatPrice(stats.ganancia)}
+      </p>
+    </div>
+  );
+}

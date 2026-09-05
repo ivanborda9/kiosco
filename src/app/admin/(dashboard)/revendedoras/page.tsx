@@ -1,16 +1,49 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { formatPrice, formatDate } from "@/lib/format";
+import { buildCostMap, buildResellerStats } from "@/lib/reports";
 import { toggleResellerActive, toggleResellerDiscountActive, deleteReseller, markCommissionPaid } from "./actions";
 import { ConfirmSubmitButton } from "@/components/admin/ConfirmSubmitButton";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminResellersPage() {
-  const resellers = await prisma.reseller.findMany({
-    include: { orders: true },
-    orderBy: { createdAt: "desc" },
-  });
+type SortKey = "ventas" | "ganancia" | "localidad";
+
+export default async function AdminResellersPage({
+  searchParams,
+}: {
+  searchParams: { sort?: string };
+}) {
+  const [resellers, orders, products] = await Promise.all([
+    prisma.reseller.findMany({ orderBy: { createdAt: "desc" } }),
+    prisma.order.findMany({ include: { items: true } }),
+    prisma.product.findMany({ select: { id: true, costPrice: true } }),
+  ]);
+
+  const costMap = buildCostMap(products);
+  const rows = resellers.map((r) => ({ reseller: r, stats: buildResellerStats(r, orders, costMap) }));
+
+  const sort = (searchParams.sort as SortKey) || undefined;
+  if (sort === "ventas") {
+    rows.sort((a, b) => b.stats.salesCount - a.stats.salesCount);
+  } else if (sort === "ganancia") {
+    rows.sort((a, b) => b.stats.netProfitGenerated - a.stats.netProfitGenerated);
+  } else if (sort === "localidad") {
+    rows.sort((a, b) => (a.reseller.city || "").localeCompare(b.reseller.city || ""));
+  }
+
+  const sortLink = (key: SortKey, label: string) => (
+    <Link
+      href={`/admin/revendedoras?sort=${key}`}
+      className={`rounded-full border px-3 py-1 text-xs font-medium ${
+        sort === key
+          ? "border-brand-600 bg-brand-600 text-white"
+          : "border-gray-300 text-gray-600 hover:bg-gray-50"
+      }`}
+    >
+      {label}
+    </Link>
+  );
 
   return (
     <div>
@@ -22,6 +55,23 @@ export default async function AdminResellersPage() {
         >
           + Nueva revendedora
         </Link>
+      </div>
+
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <span className="text-xs font-medium uppercase text-gray-500">Ordenar por:</span>
+        <Link
+          href="/admin/revendedoras"
+          className={`rounded-full border px-3 py-1 text-xs font-medium ${
+            !sort
+              ? "border-brand-600 bg-brand-600 text-white"
+              : "border-gray-300 text-gray-600 hover:bg-gray-50"
+          }`}
+        >
+          Más recientes
+        </Link>
+        {sortLink("ventas", "Más ventas")}
+        {sortLink("ganancia", "Más ganancia generada")}
+        {sortLink("localidad", "Localidad")}
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
@@ -36,87 +86,90 @@ export default async function AdminResellersPage() {
               <th className="px-4 py-3">Ventas</th>
               <th className="px-4 py-3">Comisión total</th>
               <th className="px-4 py-3">Comisión pendiente</th>
+              <th className="px-4 py-3">Ganancia generada</th>
               <th className="px-4 py-3">Último pago</th>
               <th className="px-4 py-3">Estado</th>
               <th className="px-4 py-3 text-right">Acciones</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {resellers.map((r) => {
-              const activeOrders = r.orders.filter((o) => o.status !== "CANCELADO");
-              const earned = activeOrders.reduce((sum, o) => sum + o.commissionAmount, 0);
-              const pending = activeOrders
-                .filter((o) => !r.lastPayoutAt || o.createdAt > r.lastPayoutAt)
-                .reduce((sum, o) => sum + o.commissionAmount, 0);
-              return (
-                <tr key={r.id}>
-                  <td className="px-4 py-3 font-medium text-gray-900">{r.name}</td>
-                  <td className="px-4 py-3 text-gray-600">{r.city || "—"}</td>
-                  <td className="px-4 py-3 font-mono text-brand-700">{r.code}</td>
-                  <td className="px-4 py-3">
-                    {r.discountPercent}%{" "}
-                    {!r.discountActive && (
-                      <span className="ml-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-600">
-                        Deshabilitado
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">{r.commissionPercent}%</td>
-                  <td className="px-4 py-3">{activeOrders.length}</td>
-                  <td className="px-4 py-3 font-semibold">{formatPrice(earned)}</td>
-                  <td className="px-4 py-3 font-semibold text-brand-700">{formatPrice(pending)}</td>
-                  <td className="px-4 py-3 text-xs text-gray-500">
-                    {r.lastPayoutAt ? formatDate(r.lastPayoutAt) : "Nunca"}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-                        r.active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
-                      }`}
-                    >
-                      {r.active ? "Activa" : "Inactiva"}
+            {rows.map(({ reseller: r, stats }) => (
+              <tr key={r.id}>
+                <td className="px-4 py-3 font-medium text-gray-900">
+                  <Link href={`/admin/revendedoras/${r.id}`} className="hover:text-brand-700 hover:underline">
+                    {r.name}
+                  </Link>
+                </td>
+                <td className="px-4 py-3 text-gray-600">{r.city || "—"}</td>
+                <td className="px-4 py-3 font-mono text-brand-700">{r.code}</td>
+                <td className="px-4 py-3">
+                  {r.discountPercent}%{" "}
+                  {!r.discountActive && (
+                    <span className="ml-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-600">
+                      Deshabilitado
                     </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex justify-end gap-3">
-                      <Link href={`/admin/revendedoras/${r.id}/editar`} className="text-brand-600 hover:underline">
-                        Editar
-                      </Link>
-                      <form action={toggleResellerActive.bind(null, r.id, !r.active)}>
-                        <button type="submit" className="text-gray-600 hover:underline">
-                          {r.active ? "Desactivar" : "Activar"}
-                        </button>
-                      </form>
-                      <form action={toggleResellerDiscountActive.bind(null, r.id, !r.discountActive)}>
-                        <button type="submit" className="text-gray-600 hover:underline">
-                          {r.discountActive ? "Deshabilitar descuento" : "Habilitar descuento"}
-                        </button>
-                      </form>
-                      {pending > 0 && (
-                        <form action={markCommissionPaid.bind(null, r.id)}>
-                          <ConfirmSubmitButton
-                            confirmMessage={`¿Confirmás que ya le pagaste ${formatPrice(
-                              pending
-                            )} de comisión a ${r.name}? Se va a reiniciar el contador de comisión pendiente.`}
-                            className="text-green-600 hover:underline"
-                          >
-                            Marcar pagada
-                          </ConfirmSubmitButton>
-                        </form>
-                      )}
-                      <form action={deleteReseller.bind(null, r.id)}>
+                  )}
+                </td>
+                <td className="px-4 py-3">{r.commissionPercent}%</td>
+                <td className="px-4 py-3">{stats.salesCount}</td>
+                <td className="px-4 py-3 font-semibold">{formatPrice(stats.commissionEarned)}</td>
+                <td className="px-4 py-3 font-semibold text-brand-700">
+                  {formatPrice(stats.pendingCommission)}
+                </td>
+                <td className="px-4 py-3 font-semibold text-gray-700">
+                  {formatPrice(stats.netProfitGenerated)}
+                </td>
+                <td className="px-4 py-3 text-xs text-gray-500">
+                  {r.lastPayoutAt ? formatDate(r.lastPayoutAt) : "Nunca"}
+                </td>
+                <td className="px-4 py-3">
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                      r.active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
+                    }`}
+                  >
+                    {r.active ? "Activa" : "Inactiva"}
+                  </span>
+                </td>
+                <td className="px-4 py-3">
+                  <div className="flex justify-end gap-3">
+                    <Link href={`/admin/revendedoras/${r.id}/editar`} className="text-brand-600 hover:underline">
+                      Editar
+                    </Link>
+                    <form action={toggleResellerActive.bind(null, r.id, !r.active)}>
+                      <button type="submit" className="text-gray-600 hover:underline">
+                        {r.active ? "Desactivar" : "Activar"}
+                      </button>
+                    </form>
+                    <form action={toggleResellerDiscountActive.bind(null, r.id, !r.discountActive)}>
+                      <button type="submit" className="text-gray-600 hover:underline">
+                        {r.discountActive ? "Deshabilitar descuento" : "Habilitar descuento"}
+                      </button>
+                    </form>
+                    {stats.pendingCommission > 0 && (
+                      <form action={markCommissionPaid.bind(null, r.id)}>
                         <ConfirmSubmitButton
-                          confirmMessage="¿Eliminar esta revendedora? Si tiene ventas asociadas, se desactivará en su lugar."
-                          className="text-red-500 hover:underline"
+                          confirmMessage={`¿Confirmás que ya le pagaste ${formatPrice(
+                            stats.pendingCommission
+                          )} de comisión a ${r.name}? Se va a reiniciar el contador de comisión pendiente.`}
+                          className="text-green-600 hover:underline"
                         >
-                          Eliminar
+                          Marcar pagada
                         </ConfirmSubmitButton>
                       </form>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
+                    )}
+                    <form action={deleteReseller.bind(null, r.id)}>
+                      <ConfirmSubmitButton
+                        confirmMessage="¿Eliminar esta revendedora? Si tiene ventas asociadas, se desactivará en su lugar."
+                        className="text-red-500 hover:underline"
+                      >
+                        Eliminar
+                      </ConfirmSubmitButton>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
         {resellers.length === 0 && (
