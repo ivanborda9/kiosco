@@ -41,8 +41,9 @@ por cada venta.
   se puede eliminar una categoría que todavía tiene productos cargados.
 - ABM de revendedoras: código de descuento, % de descuento para la clienta,
   % de comisión y contraseña opcional para su panel. Al registrarse solas
-  desde `/revendedora/registro` la comisión arranca en **25%**, pero se
-  puede modificar en cualquier momento desde "Editar". La lista muestra la
+  desde `/revendedora/registro` tanto el descuento para la clienta como la
+  comisión arrancan en **0%**, y el admin les asigna los valores reales
+  desde "Editar" al aprobarlas. La lista muestra la
   comisión total histórica y la comisión pendiente (desde el último pago);
   el botón **"Marcar pagada"** registra la fecha de pago y reinicia el
   contador de pendiente a $0, sin borrar el historial de ventas. También se
