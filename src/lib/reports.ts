@@ -51,6 +51,36 @@ export function monthKey(date: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 }
 
+/** Fecha (lunes) de inicio de la semana que contiene `date`, como clave YYYY-MM-DD. */
+export function weekKey(date: Date): string {
+  const d = startOfDay(date);
+  const diffToMonday = (d.getDay() + 6) % 7;
+  d.setDate(d.getDate() - diffToMonday);
+  return dayKey(d);
+}
+
+/**
+ * Margen de ganancia promedio (ponderado por monto vendido) de un conjunto de
+ * items vendidos: suma de (precio - costo) sobre suma de precio, solo entre
+ * los productos que tienen precio de costo cargado. Si ninguno lo tiene,
+ * devuelve null.
+ */
+export function revenueWeightedMarginPercent(
+  items: { productId: string; price: number; quantity: number }[],
+  costByProductId: CostMap
+): number | null {
+  let revenue = 0;
+  let profit = 0;
+  for (const item of items) {
+    const cost = costByProductId.get(item.productId);
+    if (cost == null || cost <= 0 || item.price <= 0) continue;
+    revenue += item.price * item.quantity;
+    profit += (item.price - cost) * item.quantity;
+  }
+  if (revenue <= 0) return null;
+  return (profit / revenue) * 100;
+}
+
 type OrderForStats = {
   status: string;
   total: number;

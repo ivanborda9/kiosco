@@ -1,29 +1,86 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/format";
+import { computeProfit } from "@/lib/margin";
 import {
   buildCostMap,
   orderNetProfit,
+  revenueWeightedMarginPercent,
   startOfDay,
   daysAgo,
   dayKey,
+  weekKey,
   monthKey,
 } from "@/lib/reports";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminReportsPage() {
+type MarginPeriod = "dia" | "semana" | "mes";
+
+function formatMargin(value: number | null): string {
+  return value == null ? "—" : `${value.toFixed(1)}%`;
+}
+
+export default async function AdminReportsPage({
+  searchParams,
+}: {
+  searchParams: { margenPeriodo?: string };
+}) {
   const [orders, products] = await Promise.all([
     prisma.order.findMany({
       where: { status: { not: "CANCELADO" } },
       include: { items: true, reseller: true },
       orderBy: { createdAt: "desc" },
     }),
-    prisma.product.findMany({ select: { id: true, category: true, costPrice: true } }),
+    prisma.product.findMany({ select: { id: true, category: true, costPrice: true, price: true, active: true } }),
   ]);
 
   const costMap = buildCostMap(products);
   const productCategory = new Map(products.map((p) => [p.id, p.category]));
+
+  // Margen de ganancia promedio de los productos activos (precio vs. costo cargado)
+  const activeProducts = products.filter((p) => p.active);
+  const productMargins = activeProducts
+    .map((p) => computeProfit(p.price, p.costPrice)?.marginPercent)
+    .filter((m): m is number => m != null);
+  const avgProductMargin =
+    productMargins.length > 0
+      ? productMargins.reduce((a, b) => a + b, 0) / productMargins.length
+      : null;
+  const productsWithoutCost = activeProducts.length - productMargins.length;
+
+  // Margen de ganancia promedio de las ventas (precio vs. costo, ponderado por monto vendido)
+  const allSoldItems = orders.flatMap((o) =>
+    o.items.map((i) => ({ productId: i.productId, price: i.price, quantity: i.quantity }))
+  );
+  const avgSalesMargin = revenueWeightedMarginPercent(allSoldItems, costMap);
+
+  const margenPeriodo: MarginPeriod =
+    searchParams.margenPeriodo === "semana" || searchParams.margenPeriodo === "mes"
+      ? searchParams.margenPeriodo
+      : "dia";
+
+  const marginKeyFn = margenPeriodo === "semana" ? weekKey : margenPeriodo === "mes" ? monthKey : dayKey;
+  const marginCutoff =
+    margenPeriodo === "dia" ? daysAgo(13) : margenPeriodo === "semana" ? daysAgo(7 * 11) : null;
+
+  const marginBuckets = new Map<string, { productId: string; price: number; quantity: number }[]>();
+  for (const o of orders) {
+    if (marginCutoff && o.createdAt < marginCutoff) continue;
+    const key = marginKeyFn(o.createdAt);
+    const bucket = marginBuckets.get(key) ?? [];
+    for (const item of o.items) {
+      bucket.push({ productId: item.productId, price: item.price, quantity: item.quantity });
+    }
+    marginBuckets.set(key, bucket);
+  }
+  const marginRows = Array.from(marginBuckets.entries())
+    .map(([key, items]) => ({
+      key,
+      margin: revenueWeightedMarginPercent(items, costMap),
+      ventas: items.reduce((sum, i) => sum + i.price * i.quantity, 0),
+    }))
+    .sort((a, b) => b.key.localeCompare(a.key));
 
   function statsForRange(from: Date) {
     const filtered = orders.filter((o) => o.createdAt >= from);
@@ -125,6 +182,71 @@ export default async function AdminReportsPage() {
         <RangeCard title="Hoy" stats={hoy} />
         <RangeCard title="Últimos 7 días" stats={ultimos7} />
         <RangeCard title="Últimos 30 días" stats={ultimos30} />
+      </div>
+
+      <div className="mb-8 grid gap-6 lg:grid-cols-2">
+        <section className="rounded-xl border border-gray-200 bg-white p-5">
+          <h2 className="mb-1 font-bold text-gray-900">Margen de ganancia de los productos activos</h2>
+          <p className="mb-3 text-xs text-gray-500">
+            Promedio de (precio − costo) / precio entre los productos activos que tienen precio de
+            costo cargado.
+          </p>
+          <p className="text-3xl font-bold text-brand-700">{formatMargin(avgProductMargin)}</p>
+          {productsWithoutCost > 0 && (
+            <p className="mt-2 text-xs text-gray-400">
+              {productsWithoutCost} producto(s) activo(s) sin precio de costo cargado no se cuentan
+              en este promedio.
+            </p>
+          )}
+        </section>
+
+        <section className="rounded-xl border border-gray-200 bg-white p-5">
+          <h2 className="mb-1 font-bold text-gray-900">Margen de ganancia de las ventas</h2>
+          <p className="mb-3 text-xs text-gray-500">
+            Ganancia sobre el precio de venta de todo lo vendido hasta el momento (solo considera
+            productos con precio de costo cargado).
+          </p>
+          <p className="text-3xl font-bold text-brand-700">{formatMargin(avgSalesMargin)}</p>
+
+          <div className="mt-4 flex items-center gap-2">
+            {(["dia", "semana", "mes"] as MarginPeriod[]).map((p) => (
+              <Link
+                key={p}
+                href={`/admin/reportes?margenPeriodo=${p}`}
+                className={`rounded-full border px-3 py-1 text-xs font-medium ${
+                  margenPeriodo === p
+                    ? "border-brand-600 bg-brand-600 text-white"
+                    : "border-gray-300 text-gray-600 hover:bg-gray-50"
+                }`}
+              >
+                {p === "dia" ? "Por día" : p === "semana" ? "Por semana" : "Por mes"}
+              </Link>
+            ))}
+          </div>
+
+          {marginRows.length === 0 ? (
+            <p className="mt-3 text-sm text-gray-500">Sin ventas todavía.</p>
+          ) : (
+            <table className="mt-3 w-full text-sm">
+              <thead className="text-left text-xs uppercase text-gray-500">
+                <tr>
+                  <th className="pb-2">{margenPeriodo === "semana" ? "Semana del" : margenPeriodo === "mes" ? "Mes" : "Fecha"}</th>
+                  <th className="pb-2">Vendido</th>
+                  <th className="pb-2">Margen</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {marginRows.map((r) => (
+                  <tr key={r.key}>
+                    <td className="py-1.5">{r.key}</td>
+                    <td className="py-1.5">{formatPrice(r.ventas)}</td>
+                    <td className="py-1.5 text-brand-700">{formatMargin(r.margin)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </section>
       </div>
 
       <div className="mb-8 grid gap-6 lg:grid-cols-2">

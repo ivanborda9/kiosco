@@ -64,7 +64,11 @@ por cada venta.
   mes, ranking de productos más vendidos y ranking de revendedoras por
   ganancia generada. La ganancia neta = ventas − costo de los productos
   vendidos (usando el precio de costo cargado en cada uno) − comisión
-  pagada a la revendedora
+  pagada a la revendedora. También muestra el **margen de ganancia
+  promedio de los productos activos** (precio vs. costo) y el **margen de
+  ganancia promedio de las ventas** realizadas hasta el momento, con la
+  opción de verlo por día, semana o mes. Ambos solo tienen en cuenta los
+  productos con precio de costo cargado
 - Listado de pedidos con detalle y cambio de estado (pendiente, confirmado,
   enviado, cancelado); los pedidos cancelados se pueden eliminar de la lista
 - **Banners** (`/admin/banners`): carrusel de banners para la home, subiendo
