@@ -1,19 +1,22 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { formatPrice, formatDate, ORDER_STATUS_LABELS, OrderStatus } from "@/lib/format";
+import { buildCostMap, orderNetProfit } from "@/lib/reports";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
-  const [orders, resellers, productCount] = await Promise.all([
-    prisma.order.findMany({ include: { reseller: true }, orderBy: { createdAt: "desc" } }),
+  const [orders, resellers, products, productCount] = await Promise.all([
+    prisma.order.findMany({ include: { reseller: true, items: true }, orderBy: { createdAt: "desc" } }),
     prisma.reseller.findMany({ include: { orders: true } }),
+    prisma.product.findMany({ select: { id: true, costPrice: true } }),
     prisma.product.count({ where: { active: true } }),
   ]);
 
+  const costMap = buildCostMap(products);
   const activeOrders = orders.filter((o) => o.status !== "CANCELADO");
   const totalSales = activeOrders.reduce((sum, o) => sum + o.total, 0);
-  const totalCommissions = activeOrders.reduce((sum, o) => sum + o.commissionAmount, 0);
+  const totalNetProfit = activeOrders.reduce((sum, o) => sum + orderNetProfit(o, costMap), 0);
   const recentOrders = orders.slice(0, 8);
 
   const resellerStats = resellers
@@ -36,7 +39,7 @@ export default async function AdminDashboardPage() {
       <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
         <StatCard label="Pedidos" value={String(orders.length)} />
         <StatCard label="Ventas totales" value={formatPrice(totalSales)} />
-        <StatCard label="Comisiones generadas" value={formatPrice(totalCommissions)} />
+        <StatCard label="Ganancias netas" value={formatPrice(totalNetProfit)} />
         <StatCard label="Productos activos" value={String(productCount)} />
       </div>
 

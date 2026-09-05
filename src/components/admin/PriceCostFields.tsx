@@ -52,7 +52,7 @@ export function PriceCostFields({
       </p>
       {profit && (
         <p className="mt-2 text-sm font-medium text-brand-700">
-          Ganancia: {formatPrice(profit.profit)} ({profit.marginPercent.toFixed(0)}% sobre el costo)
+          Ganancia: {formatPrice(profit.profit)} ({profit.marginPercent.toFixed(0)}% sobre el precio de venta)
         </p>
       )}
     </div>
