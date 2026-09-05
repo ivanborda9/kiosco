@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/format";
 import { totalStock } from "@/lib/stock";
+import { computeProfit } from "@/lib/margin";
 import { toggleProductActive, deleteProduct } from "./actions";
 import { ConfirmSubmitButton } from "@/components/admin/ConfirmSubmitButton";
 
@@ -32,17 +33,32 @@ export default async function AdminProductsPage() {
               <th className="px-4 py-3">Producto</th>
               <th className="px-4 py-3">Categoría</th>
               <th className="px-4 py-3">Precio</th>
+              <th className="px-4 py-3">Ganancia</th>
               <th className="px-4 py-3">Stock</th>
               <th className="px-4 py-3">Estado</th>
               <th className="px-4 py-3 text-right">Acciones</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {products.map((p) => (
+            {products.map((p) => {
+              const profit = computeProfit(p.price, p.costPrice);
+              return (
               <tr key={p.id}>
                 <td className="px-4 py-3 font-medium text-gray-900">{p.name}</td>
                 <td className="px-4 py-3 text-gray-600">{p.category}</td>
                 <td className="px-4 py-3">{formatPrice(p.price)}</td>
+                <td className="px-4 py-3">
+                  {profit ? (
+                    <span className="text-gray-700">
+                      {formatPrice(profit.profit)}{" "}
+                      <span className="text-xs text-gray-400">
+                        ({profit.marginPercent.toFixed(0)}%)
+                      </span>
+                    </span>
+                  ) : (
+                    <span className="text-xs text-gray-400">Sin costo cargado</span>
+                  )}
+                </td>
                 <td className="px-4 py-3">
                   {totalStock(p)}
                   {p.variants.length > 0 && (
@@ -81,7 +97,8 @@ export default async function AdminProductsPage() {
                   </div>
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
         {products.length === 0 && (

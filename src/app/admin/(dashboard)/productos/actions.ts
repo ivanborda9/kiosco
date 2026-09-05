@@ -10,6 +10,7 @@ function parseProductForm(formData: FormData) {
     name: String(formData.get("name") || "").trim(),
     description: String(formData.get("description") || "").trim(),
     price: Number(formData.get("price") || 0),
+    costPrice: formData.get("costPrice") ? Number(formData.get("costPrice")) : null,
     category: String(formData.get("category") || "").trim(),
     stock: Math.max(0, Math.floor(Number(formData.get("stock") || 0))),
     imageUrl: String(formData.get("imageUrl") || "").trim() || null,

@@ -36,6 +36,10 @@ por cada venta.
   Opcionalmente se le pueden cargar **variantes de color y/o talle**, cada
   una con su propio stock; si un producto tiene variantes, el stock general
   se ignora y las clientas eligen la variante en la ficha del producto
+- **Precio de costo y ganancia**: al cargar un producto se puede anotar su
+  costo (opcional); el formulario calcula al toque cuánto se gana en pesos
+  y en % sobre ese costo, y el listado de productos también lo muestra.
+  El costo es un dato privado del admin, nunca se expone en la tienda
 - **Categorías** (`/admin/categorias`): crear o eliminar las categorías que después
   se eligen al cargar un producto y que aparecen como filtro en el catálogo. No
   se puede eliminar una categoría que todavía tiene productos cargados.

@@ -1,9 +1,11 @@
 import { VariantsEditor, type VariantRow } from "./VariantsEditor";
+import { PriceCostFields } from "./PriceCostFields";
 
 type ProductFormValues = {
   name: string;
   description: string;
   price: number;
+  costPrice: number | null;
   category: string;
   stock: number;
   imageUrl: string | null;
@@ -53,36 +55,24 @@ export function ProductForm({
           className="w-full rounded-lg border border-gray-300 px-3 py-2"
         />
       </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Precio (ARS)</label>
-          <input
-            name="price"
-            type="number"
-            min={0}
-            step="1"
-            required
-            defaultValue={initial?.price}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2"
-          />
-        </div>
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
-            Stock {initialVariants.length > 0 ? "(sin variantes)" : ""}
-          </label>
-          <input
-            name="stock"
-            type="number"
-            min={0}
-            step="1"
-            required
-            defaultValue={initial?.stock}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2"
-          />
-          <p className="mt-1 text-xs text-gray-400">
-            Se ignora si cargás variantes de color/talle abajo.
-          </p>
-        </div>
+      <PriceCostFields initialPrice={initial?.price} initialCostPrice={initial?.costPrice} />
+
+      <div>
+        <label className="mb-1 block text-sm font-medium text-gray-700">
+          Stock {initialVariants.length > 0 ? "(sin variantes)" : ""}
+        </label>
+        <input
+          name="stock"
+          type="number"
+          min={0}
+          step="1"
+          required
+          defaultValue={initial?.stock}
+          className="w-full max-w-xs rounded-lg border border-gray-300 px-3 py-2"
+        />
+        <p className="mt-1 text-xs text-gray-400">
+          Se ignora si cargás variantes de color/talle abajo.
+        </p>
       </div>
 
       <VariantsEditor initial={initialVariants} />
