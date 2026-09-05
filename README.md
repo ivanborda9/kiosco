@@ -185,9 +185,12 @@ corresponde liberar el stock.
    `MERCADOPAGO_WEBHOOK_SECRET` y `BLOB_READ_WRITE_TOKEN` son opcionales,
    ver más abajo).
 3. Deployá. El comando `build` (`prisma generate && prisma db push && ...`)
-   crea las tablas automáticamente en cada deploy, y el seed carga los
-   productos de ejemplo solo si la base está vacía (no duplica datos en
-   redeploys posteriores) — no hace falta correr nada a mano.
+   crea las tablas automáticamente en cada deploy, y el seed carga el
+   catálogo, las categorías y las revendedoras de ejemplo **solo la primera
+   vez** que se despliega (base vacía) — no hace falta correr nada a mano.
+   En los deploys siguientes no se vuelve a tocar esos datos, así que borrar
+   un producto, una categoría o una revendedora desde el admin es
+   definitivo y no reaparece en el próximo deploy.
 
 Vercel sirve el sitio por HTTPS automáticamente, que es necesario porque la
 cookie de sesión del admin se marca `Secure`.

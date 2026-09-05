@@ -620,13 +620,28 @@ const resellers = [
 ];
 
 async function main() {
-  // Se crea antes que nada y de forma idempotente para evitar que varias páginas
-  // generadas en paralelo durante "next build" compitan por crear la misma fila.
+  // Este script corre en CADA build/deploy (ver package.json), no solo la primera
+  // vez. Si siempre insertara el catálogo/categorías/revendedoras de ejemplo,
+  // cualquier cosa que el negocio borre desde el admin volvería a aparecer en el
+  // próximo deploy. Por eso, la carga de datos de ejemplo se hace una única vez:
+  // se usa la existencia de la fila de SiteSettings como marca de "ya se inicializó
+  // esta base" (se crea más abajo, en el mismo run en que se cargan los ejemplos).
+  const yaInicializada = Boolean(await prisma.siteSettings.findUnique({ where: { id: "singleton" } }));
+
+  // Se crea de forma idempotente para evitar que varias páginas generadas en
+  // paralelo durante "next build" compitan por crear la misma fila.
   await prisma.siteSettings.upsert({
     where: { id: "singleton" },
     update: {},
     create: { id: "singleton" },
   });
+
+  if (yaInicializada) {
+    console.log(
+      "La base ya estaba inicializada: se omite la carga de catálogo, categorías y revendedoras de ejemplo para no pisar los cambios hechos desde el admin."
+    );
+    return;
+  }
 
   // Categorías del catálogo base, para que el admin pueda gestionarlas desde
   // /admin/categorias sin perder las que ya vienen cargadas.
