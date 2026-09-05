@@ -8,11 +8,12 @@ export async function loginAction(formData: FormData) {
   const username = String(formData.get("username") || "");
   const password = String(formData.get("password") || "");
 
-  if (!checkAdminCredentials(username, password)) {
+  const role = checkAdminCredentials(username, password);
+  if (!role) {
     redirect("/admin/login?error=1");
   }
 
-  const token = await createSessionToken();
+  const token = await createSessionToken(role);
   cookies().set(SESSION_COOKIE_NAME, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -21,7 +22,7 @@ export async function loginAction(formData: FormData) {
     maxAge: SESSION_COOKIE_MAX_AGE,
   });
 
-  redirect("/admin");
+  redirect(role === "empleado" ? "/admin/pedidos" : "/admin");
 }
 
 export async function logoutAction() {

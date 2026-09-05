@@ -1,14 +1,19 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { formatPrice, formatDate, formatVariantLabel, ORDER_STATUSES, ORDER_STATUS_LABELS } from "@/lib/format";
+import { getAdminRole } from "@/lib/adminSession";
 import { updateOrderStatus } from "../actions";
 
 export default async function AdminOrderDetailPage({ params }: { params: { id: string } }) {
-  const order = await prisma.order.findUnique({
-    where: { id: params.id },
-    include: { items: true, reseller: true },
-  });
+  const [order, role] = await Promise.all([
+    prisma.order.findUnique({
+      where: { id: params.id },
+      include: { items: true, reseller: true },
+    }),
+    getAdminRole(),
+  ]);
   if (!order) notFound();
+  const isOwner = role === "owner";
 
   return (
     <div className="max-w-2xl">
@@ -16,6 +21,13 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
         Pedido #{order.id.slice(-6).toUpperCase()}
       </h1>
       <p className="mb-6 text-sm text-gray-500">{formatDate(order.createdAt)}</p>
+
+      <div className="mb-6 rounded-xl border border-gray-200 bg-white p-4">
+        <h2 className="mb-2 font-semibold text-gray-900">Datos de envío</h2>
+        <p className="text-sm text-gray-700">{order.customerName}</p>
+        <p className="text-sm text-gray-700">{order.customerPhone}</p>
+        <p className="text-sm text-gray-700">{order.customerAddress}</p>
+      </div>
 
       <div className="mb-6 grid gap-4 sm:grid-cols-2">
         <div className="rounded-xl border border-gray-200 bg-white p-4">
@@ -27,9 +39,11 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
               </p>
               {order.reseller.phone && <p className="text-sm text-gray-700">{order.reseller.phone}</p>}
               {order.reseller.city && <p className="text-sm text-gray-700">{order.reseller.city}</p>}
-              <p className="text-sm text-gray-700">
-                Comisión: {formatPrice(order.commissionAmount)} ({order.reseller.commissionPercent}%)
-              </p>
+              {isOwner && (
+                <p className="text-sm text-gray-700">
+                  Comisión: {formatPrice(order.commissionAmount)} ({order.reseller.commissionPercent}%)
+                </p>
+              )}
             </>
           ) : (
             <p className="text-sm text-gray-500">Venta directa, sin revendedora.</p>

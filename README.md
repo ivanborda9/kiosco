@@ -110,21 +110,33 @@ para el panel (usuario/clave definidos en `.env`).
 | Variable | Descripción |
 |---|---|
 | `DATABASE_URL` | Cadena de conexión de Postgres (`postgresql://usuario:password@host:5432/db`) |
-| `ADMIN_USERNAME` / `ADMIN_PASSWORD` | Credenciales del panel de admin |
+| `ADMIN_USERNAME` / `ADMIN_PASSWORD` | Credenciales del panel de admin (acceso completo) |
+| `EMPLOYEE_USERNAME` / `EMPLOYEE_PASSWORD` | Opcional. Credenciales de un acceso restringido para un empleado (ver abajo) |
 | `ADMIN_SESSION_SECRET` | Cadena secreta larga para firmar las sesiones (admin y revendedoras) |
 
 **Importante:** cambiá `ADMIN_PASSWORD` y `ADMIN_SESSION_SECRET` antes de
 publicar el sitio. El nombre de la tienda, el color, el banner y el número
 de WhatsApp se configuran desde `/admin/configuracion`, no acá.
 
+### Acceso para un empleado (sin ver ganancias)
+
+Si configurás `EMPLOYEE_USERNAME` y `EMPLOYEE_PASSWORD`, esas credenciales
+también entran por `/admin/login`, pero con acceso limitado únicamente a
+`/admin/pedidos`: puede ver la lista de pedidos, sus datos de envío
+(nombre, teléfono, dirección) y cambiar el estado del pedido (a preparación,
+enviado, entregado, etc). No puede ver ni acceder a Resumen, Reportes,
+Productos, Categorías, Revendedoras, Banners ni Configuración, y en el
+detalle de un pedido no ve la comisión de la revendedora. Tampoco puede
+eliminar pedidos cancelados. Si dejás esas dos variables vacías, ese acceso
+directamente no existe.
+
 ## Cargar tus propios productos
 
 Desde `/admin/productos` podés cargar cada producto con su nombre, precio,
-stock, categoría e imagen. La imagen se puede cargar de dos formas: pegando
-una URL, o subiendo el archivo directamente desde tu computadora (esto
-último requiere conectar Vercel Blob Storage, ver la sección siguiente).
-También podés agregar varias fotos adicionales por producto, que se
-muestran como galería en la ficha del producto. Los productos de ejemplo
+stock, categoría e imagen. Las fotos se suben directamente desde tu
+computadora (esto requiere conectar Vercel Blob Storage, ver la sección
+siguiente): la primera reemplaza la foto principal y el resto se agrega
+como galería adicional en la ficha del producto. Los productos de ejemplo
 usan íconos en `public/products/` como respaldo cuando una foto no carga.
 
 ## Subir fotos y banners desde archivos (Vercel Blob Storage)
@@ -181,9 +193,9 @@ corresponde liberar el stock.
    [Supabase](https://supabase.com) y copiá su cadena de conexión.
 2. En el proyecto de Vercel, cargá las variables de entorno: `DATABASE_URL`
    (la de Postgres), `ADMIN_USERNAME`, `ADMIN_PASSWORD` y
-   `ADMIN_SESSION_SECRET` (`MERCADOPAGO_ACCESS_TOKEN`,
-   `MERCADOPAGO_WEBHOOK_SECRET` y `BLOB_READ_WRITE_TOKEN` son opcionales,
-   ver más abajo).
+   `ADMIN_SESSION_SECRET` (`EMPLOYEE_USERNAME`, `EMPLOYEE_PASSWORD`,
+   `MERCADOPAGO_ACCESS_TOKEN`, `MERCADOPAGO_WEBHOOK_SECRET` y
+   `BLOB_READ_WRITE_TOKEN` son opcionales, ver más abajo).
 3. Deployá. El comando `build` (`prisma generate && prisma db push && ...`)
    crea las tablas automáticamente en cada deploy, y el seed carga el
    catálogo, las categorías y las revendedoras de ejemplo **solo la primera

@@ -15,10 +15,14 @@ export async function middleware(req: NextRequest) {
     }
 
     const token = req.cookies.get(SESSION_COOKIE_NAME)?.value;
-    const valid = await verifySessionToken(token);
+    const role = await verifySessionToken(token);
 
-    if (!valid) {
+    if (!role) {
       return NextResponse.redirect(new URL("/admin/login", req.url));
+    }
+
+    if (role === "empleado" && !pathname.startsWith("/admin/pedidos")) {
+      return NextResponse.redirect(new URL("/admin/pedidos", req.url));
     }
 
     return NextResponse.next();

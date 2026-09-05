@@ -2,6 +2,8 @@ export const SESSION_COOKIE_NAME = "admin_session";
 export const RESELLER_SESSION_COOKIE_NAME = "reseller_session";
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 7; // 7 días
 
+export type AdminRole = "owner" | "empleado";
+
 function getSecret(): string {
   const secret = process.env.ADMIN_SESSION_SECRET;
   if (!secret) {
@@ -48,23 +50,40 @@ async function verifySignedToken(token: string | undefined): Promise<string | nu
   return payload;
 }
 
-export async function createSessionToken(): Promise<string> {
+export async function createSessionToken(role: AdminRole): Promise<string> {
   const expiresAt = Date.now() + SESSION_MAX_AGE_SECONDS * 1000;
-  return createSignedToken(`${expiresAt}`);
+  return createSignedToken(`${role}|${expiresAt}`);
 }
 
-export async function verifySessionToken(token: string | undefined): Promise<boolean> {
+export async function verifySessionToken(token: string | undefined): Promise<AdminRole | null> {
   const payload = await verifySignedToken(token);
-  if (!payload) return false;
-  const expiresAt = Number(payload);
-  return Number.isFinite(expiresAt) && Date.now() <= expiresAt;
+  if (!payload) return null;
+  const [role, expiresAtRaw] = payload.split("|");
+  const expiresAt = Number(expiresAtRaw);
+  if (role !== "owner" && role !== "empleado") return null;
+  if (!Number.isFinite(expiresAt) || Date.now() > expiresAt) return null;
+  return role;
 }
 
-export function checkAdminCredentials(username: string, password: string): boolean {
-  const validUsername = process.env.ADMIN_USERNAME ?? "";
-  const validPassword = process.env.ADMIN_PASSWORD ?? "";
-  if (!validUsername || !validPassword) return false;
-  return timingSafeEqual(username, validUsername) && timingSafeEqual(password, validPassword);
+export function checkAdminCredentials(username: string, password: string): AdminRole | null {
+  const ownerUsername = process.env.ADMIN_USERNAME ?? "";
+  const ownerPassword = process.env.ADMIN_PASSWORD ?? "";
+  if (ownerUsername && ownerPassword && timingSafeEqual(username, ownerUsername) && timingSafeEqual(password, ownerPassword)) {
+    return "owner";
+  }
+
+  const employeeUsername = process.env.EMPLOYEE_USERNAME ?? "";
+  const employeePassword = process.env.EMPLOYEE_PASSWORD ?? "";
+  if (
+    employeeUsername &&
+    employeePassword &&
+    timingSafeEqual(username, employeeUsername) &&
+    timingSafeEqual(password, employeePassword)
+  ) {
+    return "empleado";
+  }
+
+  return null;
 }
 
 export async function createResellerSessionToken(resellerId: string): Promise<string> {

@@ -3,15 +3,20 @@ import { prisma } from "@/lib/prisma";
 import { formatPrice, formatDate, OrderStatus } from "@/lib/format";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { ConfirmSubmitButton } from "@/components/admin/ConfirmSubmitButton";
+import { getAdminRole } from "@/lib/adminSession";
 import { deleteCancelledOrder } from "./actions";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminOrdersPage() {
-  const orders = await prisma.order.findMany({
-    include: { reseller: true },
-    orderBy: { createdAt: "desc" },
-  });
+  const [orders, role] = await Promise.all([
+    prisma.order.findMany({
+      include: { reseller: true },
+      orderBy: { createdAt: "desc" },
+    }),
+    getAdminRole(),
+  ]);
+  const isOwner = role === "owner";
 
   return (
     <div>
@@ -69,7 +74,7 @@ export default async function AdminOrdersPage() {
                     <Link href={`/admin/pedidos/${o.id}`} className="text-brand-600 hover:underline">
                       Ver
                     </Link>
-                    {o.status === "CANCELADO" && (
+                    {isOwner && o.status === "CANCELADO" && (
                       <form action={deleteCancelledOrder.bind(null, o.id)}>
                         <ConfirmSubmitButton
                           confirmMessage="¿Eliminar este pedido cancelado? Esta acción no se puede deshacer."

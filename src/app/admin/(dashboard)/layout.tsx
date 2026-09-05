@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { logoutAction } from "../login/actions";
+import { getAdminRole } from "@/lib/adminSession";
 
-const links = [
+const ownerLinks = [
   { href: "/admin", label: "Resumen" },
   { href: "/admin/reportes", label: "Reportes" },
   { href: "/admin/productos", label: "Productos" },
@@ -12,7 +13,11 @@ const links = [
   { href: "/admin/configuracion", label: "Configuración" },
 ];
 
-export default function AdminDashboardLayout({ children }: { children: React.ReactNode }) {
+const employeeLinks = [{ href: "/admin/pedidos", label: "Pedidos" }];
+
+export default async function AdminDashboardLayout({ children }: { children: React.ReactNode }) {
+  const role = await getAdminRole();
+  const links = role === "empleado" ? employeeLinks : ownerLinks;
   return (
     <div className="flex min-h-screen bg-gray-50">
       <aside className="hidden w-56 flex-shrink-0 flex-col border-r border-gray-200 bg-white p-4 sm:flex">
