@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { formatPrice, formatDate, ORDER_STATUS_LABELS, OrderStatus } from "@/lib/format";
-import { buildCostMap, orderNetProfit } from "@/lib/reports";
+import { buildCostMap, orderNetProfit, startOfDay } from "@/lib/reports";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
   const [orders, resellers, products, productCount] = await Promise.all([
     prisma.order.findMany({ include: { reseller: true, items: true }, orderBy: { createdAt: "desc" } }),
-    prisma.reseller.findMany({ include: { orders: true } }),
+    prisma.reseller.findMany(),
     prisma.product.findMany({ select: { id: true, costPrice: true } }),
     prisma.product.count({ where: { active: true } }),
   ]);
@@ -19,18 +19,21 @@ export default async function AdminDashboardPage() {
   const totalNetProfit = activeOrders.reduce((sum, o) => sum + orderNetProfit(o, costMap), 0);
   const recentOrders = orders.slice(0, 8);
 
-  const resellerStats = resellers
+  const todayStart = startOfDay(new Date());
+  const todayOrders = activeOrders.filter((o) => o.createdAt >= todayStart);
+  const todaySalesByReseller = resellers
     .map((r) => {
-      const rOrders = r.orders.filter((o) => o.status !== "CANCELADO");
+      const rOrders = todayOrders.filter((o) => o.resellerId === r.id);
       return {
         id: r.id,
         name: r.name,
         code: r.code,
         salesCount: rOrders.length,
-        commissionEarned: rOrders.reduce((sum, o) => sum + o.commissionAmount, 0),
+        totalSales: rOrders.reduce((sum, o) => sum + o.total, 0),
       };
     })
-    .sort((a, b) => b.commissionEarned - a.commissionEarned);
+    .filter((r) => r.salesCount > 0)
+    .sort((a, b) => b.totalSales - a.totalSales);
 
   return (
     <div>
@@ -75,16 +78,16 @@ export default async function AdminDashboardPage() {
 
         <section className="rounded-xl border border-gray-200 bg-white p-5">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="font-bold text-gray-900">Comisiones por revendedora</h2>
+            <h2 className="font-bold text-gray-900">Ventas de hoy</h2>
             <Link href="/admin/revendedoras" className="text-sm text-brand-600 hover:underline">
               Gestionar
             </Link>
           </div>
-          {resellerStats.length === 0 ? (
-            <p className="text-sm text-gray-500">Todavía no hay revendedoras cargadas.</p>
+          {todaySalesByReseller.length === 0 ? (
+            <p className="text-sm text-gray-500">Todavía no hay ventas hoy.</p>
           ) : (
             <ul className="flex flex-col divide-y divide-gray-100">
-              {resellerStats.map((r) => (
+              {todaySalesByReseller.map((r) => (
                 <li key={r.id} className="flex items-center justify-between py-2 text-sm">
                   <div>
                     <p className="font-medium text-gray-900">{r.name}</p>
@@ -92,7 +95,7 @@ export default async function AdminDashboardPage() {
                       Código {r.code} · {r.salesCount} venta(s)
                     </p>
                   </div>
-                  <p className="font-semibold text-brand-700">{formatPrice(r.commissionEarned)}</p>
+                  <p className="font-semibold text-brand-700">{formatPrice(r.totalSales)}</p>
                 </li>
               ))}
             </ul>
