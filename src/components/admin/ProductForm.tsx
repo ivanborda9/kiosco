@@ -115,32 +115,14 @@ export function ProductForm({
           className="w-full rounded-lg border border-gray-300 px-3 py-2"
         />
         <p className="mt-1 text-xs text-gray-400">
-          Pegá un link, o subí un archivo abajo (el archivo tiene prioridad si cargás los dos).
+          Opcional: pegá un link si preferís esa opción en vez de subir un archivo. Para reemplazar
+          la foto principal por una que subas abajo, dejá este campo vacío.
         </p>
       </div>
 
-      {blobEnabled ? (
-        <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
-            Subir foto principal desde tu computadora (opcional)
-          </label>
-          <input
-            name="imageFile"
-            type="file"
-            accept="image/*"
-            className="w-full rounded-lg border border-gray-300 px-3 py-2"
-          />
-        </div>
-      ) : (
-        <p className="rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-500">
-          Para poder subir fotos desde archivos, conectá Vercel Blob Storage en tu proyecto (ver
-          README). Mientras tanto, solo se puede cargar imagen por URL.
-        </p>
-      )}
-
       {existingImages && existingImages.length > 0 && (
         <div>
-          <label className="mb-2 block text-sm font-medium text-gray-700">Fotos adicionales cargadas</label>
+          <label className="mb-2 block text-sm font-medium text-gray-700">Fotos cargadas</label>
           <div className="grid grid-cols-4 gap-3">
             {existingImages.map((img) => (
               <label key={img.id} className="relative block cursor-pointer">
@@ -160,19 +142,26 @@ export function ProductForm({
         </div>
       )}
 
-      {blobEnabled && (
+      {blobEnabled ? (
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
-            Agregar fotos adicionales (podés elegir varias)
-          </label>
+          <label className="mb-1 block text-sm font-medium text-gray-700">Subir fotos</label>
           <input
-            name="galleryFiles"
+            name="photoFiles"
             type="file"
             accept="image/*"
             multiple
             className="w-full rounded-lg border border-gray-300 px-3 py-2"
           />
+          <p className="mt-1 text-xs text-gray-400">
+            Podés elegir una o varias. Si el producto todavía no tiene foto principal, la primera
+            se usa como portada; el resto se agrega a la galería.
+          </p>
         </div>
+      ) : (
+        <p className="rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-500">
+          Para poder subir fotos desde archivos, conectá Vercel Blob Storage en tu proyecto (ver
+          README). Mientras tanto, solo se puede cargar imagen por URL.
+        </p>
       )}
 
       <button
