@@ -13,6 +13,9 @@ export async function saveSiteSettings(formData: FormData) {
   const bannerSubtitle = String(formData.get("bannerSubtitle") || "").trim();
   const bannerImageUrl = String(formData.get("bannerImageUrl") || "").trim() || null;
   const whatsappNumber = String(formData.get("whatsappNumber") || "").trim();
+  const targetMarginRaw = String(formData.get("targetMarginPercent") || "").trim();
+  const targetMarginPercent =
+    targetMarginRaw && Number.isFinite(Number(targetMarginRaw)) ? Number(targetMarginRaw) : null;
 
   await updateSiteSettings({
     storeName,
@@ -21,6 +24,7 @@ export async function saveSiteSettings(formData: FormData) {
     bannerSubtitle,
     bannerImageUrl,
     whatsappNumber,
+    targetMarginPercent,
   });
 
   revalidatePath("/", "layout");

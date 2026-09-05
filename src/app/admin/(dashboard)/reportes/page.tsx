@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/format";
 import { computeProfit } from "@/lib/margin";
+import { getSiteSettings } from "@/lib/settings";
 import {
   buildCostMap,
   orderNetProfit,
@@ -26,14 +27,16 @@ export default async function AdminReportsPage({
 }: {
   searchParams: { margenPeriodo?: string };
 }) {
-  const [orders, products] = await Promise.all([
+  const [orders, products, settings] = await Promise.all([
     prisma.order.findMany({
       where: { status: { not: "CANCELADO" } },
       include: { items: true, reseller: true },
       orderBy: { createdAt: "desc" },
     }),
     prisma.product.findMany({ select: { id: true, category: true, costPrice: true, price: true, active: true } }),
+    getSiteSettings(),
   ]);
+  const targetMargin = settings.targetMarginPercent;
 
   const costMap = buildCostMap(products);
   const productCategory = new Map(products.map((p) => [p.id, p.category]));
@@ -192,6 +195,31 @@ export default async function AdminReportsPage({
             costo cargado.
           </p>
           <p className="text-3xl font-bold text-brand-700">{formatMargin(avgProductMargin)}</p>
+          {targetMargin != null &&
+            (avgProductMargin == null ? (
+              <p className="mt-2 text-sm font-medium text-gray-500">
+                Objetivo: {targetMargin}% — todavía no se puede calcular el promedio.
+              </p>
+            ) : avgProductMargin >= targetMargin ? (
+              <p className="mt-2 text-sm font-medium text-green-600">
+                Objetivo: {targetMargin}% — cumplido (
+                {(avgProductMargin - targetMargin).toFixed(1)} puntos por encima)
+              </p>
+            ) : (
+              <p className="mt-2 text-sm font-medium text-red-600">
+                Objetivo: {targetMargin}% — te faltan {(targetMargin - avgProductMargin).toFixed(1)}{" "}
+                puntos
+              </p>
+            ))}
+          {targetMargin == null && (
+            <p className="mt-2 text-xs text-gray-400">
+              Podés fijar un margen objetivo en{" "}
+              <Link href="/admin/configuracion" className="text-brand-600 hover:underline">
+                Configuración
+              </Link>
+              .
+            </p>
+          )}
           {productsWithoutCost > 0 && (
             <p className="mt-2 text-xs text-gray-400">
               {productsWithoutCost} producto(s) activo(s) sin precio de costo cargado no se cuentan

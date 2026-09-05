@@ -71,14 +71,15 @@ model Reseller {
 }
 
 model SiteSettings {
-  id             String   @id @default("singleton")
-  storeName      String   @default("Mi Catálogo")
-  primaryColor   String   @default("#db2777")
-  bannerTitle    String   @default("Moda para vos y para revender")
-  bannerSubtitle String   @default("Elegí tus prendas favoritas. ¿Sos revendedora? Ingresá tu código en el checkout y obtené tu descuento.")
-  bannerImageUrl String?
-  whatsappNumber String   @default("")
-  updatedAt      DateTime @updatedAt
+  id                  String   @id @default("singleton")
+  storeName           String   @default("Mi Catálogo")
+  primaryColor        String   @default("#db2777")
+  bannerTitle         String   @default("Moda para vos y para revender")
+  bannerSubtitle      String   @default("Elegí tus prendas favoritas. ¿Sos revendedora? Ingresá tu código en el checkout y obtené tu descuento.")
+  bannerImageUrl      String?
+  whatsappNumber      String   @default("")
+  targetMarginPercent Float?
+  updatedAt           DateTime @updatedAt
 }
 
 model Banner {

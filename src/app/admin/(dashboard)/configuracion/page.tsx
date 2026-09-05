@@ -101,6 +101,26 @@ export default async function ConfiguracionPage({
           </p>
         </div>
 
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">
+            Margen de ganancia objetivo (%)
+          </label>
+          <input
+            name="targetMarginPercent"
+            type="number"
+            min={0}
+            max={100}
+            step="0.1"
+            placeholder="Ej: 40"
+            defaultValue={settings.targetMarginPercent ?? ""}
+            className="w-full max-w-xs rounded-lg border border-gray-300 px-3 py-2"
+          />
+          <p className="mt-1 text-xs text-gray-400">
+            Se usa en Reportes para mostrar si el margen promedio de tus productos activos llega a
+            este objetivo. Dejalo vacío si no querés fijar uno.
+          </p>
+        </div>
+
         <button
           type="submit"
           className="mt-2 self-start rounded-lg bg-brand-600 px-5 py-2.5 font-semibold text-white hover:bg-brand-700"

@@ -68,7 +68,9 @@ por cada venta.
   promedio de los productos activos** (precio vs. costo) y el **margen de
   ganancia promedio de las ventas** realizadas hasta el momento, con la
   opción de verlo por día, semana o mes. Ambos solo tienen en cuenta los
-  productos con precio de costo cargado
+  productos con precio de costo cargado. Si configurás un **margen de
+  ganancia objetivo** en `/admin/configuracion`, Reportes te muestra si el
+  promedio de tus productos activos lo alcanza o cuánto te falta
 - Listado de pedidos con detalle y cambio de estado (pendiente, confirmado,
   enviado, cancelado); los pedidos cancelados se pueden eliminar de la lista
 - **Banners** (`/admin/banners`): carrusel de banners para la home, subiendo
