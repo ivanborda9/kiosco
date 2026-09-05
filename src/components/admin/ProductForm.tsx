@@ -106,19 +106,17 @@ export function ProductForm({
         )}
       </div>
 
-      <div>
-        <label className="mb-1 block text-sm font-medium text-gray-700">URL de imagen principal</label>
-        <input
-          name="imageUrl"
-          placeholder="https://..."
-          defaultValue={initial?.imageUrl ?? ""}
-          className="w-full rounded-lg border border-gray-300 px-3 py-2"
-        />
-        <p className="mt-1 text-xs text-gray-400">
-          Opcional: pegá un link si preferís esa opción en vez de subir un archivo. Para reemplazar
-          la foto principal por una que subas abajo, dejá este campo vacío.
-        </p>
-      </div>
+      {initial?.imageUrl && (
+        <div>
+          <label className="mb-2 block text-sm font-medium text-gray-700">Foto principal actual</label>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={initial.imageUrl}
+            alt=""
+            className="h-32 w-32 rounded-lg border border-gray-200 object-cover"
+          />
+        </div>
+      )}
 
       {existingImages && existingImages.length > 0 && (
         <div>
@@ -153,14 +151,14 @@ export function ProductForm({
             className="w-full rounded-lg border border-gray-300 px-3 py-2"
           />
           <p className="mt-1 text-xs text-gray-400">
-            Podés elegir una o varias. Si el producto todavía no tiene foto principal, la primera
-            se usa como portada; el resto se agrega a la galería.
+            Podés elegir una o varias. La primera reemplaza la foto principal (la anterior pasa a
+            la galería); el resto se agrega a la galería directamente.
           </p>
         </div>
       ) : (
         <p className="rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-500">
-          Para poder subir fotos desde archivos, conectá Vercel Blob Storage en tu proyecto (ver
-          README). Mientras tanto, solo se puede cargar imagen por URL.
+          Para poder cargar fotos de producto, conectá Vercel Blob Storage en tu proyecto (ver
+          README).
         </p>
       )}
 

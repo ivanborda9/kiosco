@@ -13,7 +13,6 @@ function parseProductForm(formData: FormData) {
     costPrice: formData.get("costPrice") ? Number(formData.get("costPrice")) : null,
     category: String(formData.get("category") || "").trim(),
     stock: Math.max(0, Math.floor(Number(formData.get("stock") || 0))),
-    imageUrl: String(formData.get("imageUrl") || "").trim() || null,
   };
 }
 
@@ -67,24 +66,30 @@ function getUploadedFiles(formData: FormData, field: string): File[] {
 }
 
 /**
- * Un solo campo de subida de fotos: si el producto todavía no tiene foto
- * principal, la primera que se suba la establece como tal; el resto (y
- * todas, si ya había una) se agregan a la galería.
+ * Un solo campo de subida de fotos: la primera reemplaza la foto principal
+ * (la anterior, si había, pasa a la galería en vez de perderse) y el resto
+ * se agrega directamente a la galería.
  */
-async function uploadPhotos(formData: FormData, productId: string, hasMainImage: boolean) {
+async function uploadPhotos(formData: FormData, productId: string) {
   const files = getUploadedFiles(formData, "photoFiles");
-  let mainImageUrl: string | null = null;
+  if (files.length === 0) return;
 
-  for (const file of files) {
-    const url = await uploadImageFile(file, `productos/${productId}`);
-    if (!hasMainImage && mainImageUrl === null) {
-      mainImageUrl = url;
-    } else {
-      await prisma.productImage.create({ data: { productId, url } });
-    }
+  const [firstFile, ...restFiles] = files;
+  const current = await prisma.product.findUnique({
+    where: { id: productId },
+    select: { imageUrl: true },
+  });
+
+  const newMainUrl = await uploadImageFile(firstFile, `productos/${productId}`);
+  if (current?.imageUrl) {
+    await prisma.productImage.create({ data: { productId, url: current.imageUrl } });
   }
+  await prisma.product.update({ where: { id: productId }, data: { imageUrl: newMainUrl } });
 
-  return mainImageUrl;
+  for (const file of restFiles) {
+    const url = await uploadImageFile(file, `productos/${productId}`);
+    await prisma.productImage.create({ data: { productId, url } });
+  }
 }
 
 export async function createProduct(formData: FormData) {
@@ -97,10 +102,7 @@ export async function createProduct(formData: FormData) {
   }
 
   if (isBlobConfigured()) {
-    const mainImageUrl = await uploadPhotos(formData, product.id, Boolean(data.imageUrl));
-    if (mainImageUrl) {
-      await prisma.product.update({ where: { id: product.id }, data: { imageUrl: mainImageUrl } });
-    }
+    await uploadPhotos(formData, product.id);
   }
 
   revalidatePath("/admin/productos");
@@ -124,10 +126,7 @@ export async function updateProduct(id: string, formData: FormData) {
       await Promise.all(toDelete.map((img) => deleteImageFile(img.url)));
     }
 
-    const mainImageUrl = await uploadPhotos(formData, id, Boolean(data.imageUrl));
-    if (mainImageUrl) {
-      await prisma.product.update({ where: { id }, data: { imageUrl: mainImageUrl } });
-    }
+    await uploadPhotos(formData, id);
   }
 
   revalidatePath("/admin/productos");
