@@ -22,7 +22,7 @@ export default async function AdminOrdersPage() {
           <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500">
             <tr>
               <th className="px-4 py-3">Pedido</th>
-              <th className="px-4 py-3">Cliente</th>
+              <th className="px-4 py-3">Localidad</th>
               <th className="px-4 py-3">Revendedora</th>
               <th className="px-4 py-3">Total</th>
               <th className="px-4 py-3">Pago</th>
@@ -35,7 +35,7 @@ export default async function AdminOrdersPage() {
             {orders.map((o) => (
               <tr key={o.id}>
                 <td className="px-4 py-3 font-mono text-gray-500">#{o.id.slice(-6).toUpperCase()}</td>
-                <td className="px-4 py-3 font-medium text-gray-900">{o.customerName}</td>
+                <td className="px-4 py-3 font-medium text-gray-900">{o.reseller?.city || "—"}</td>
                 <td className="px-4 py-3">{o.reseller?.code ?? "—"}</td>
                 <td className="px-4 py-3 font-semibold">{formatPrice(o.total)}</td>
                 <td className="px-4 py-3">
