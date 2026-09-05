@@ -20,11 +20,13 @@ export default async function NewManualSalePage({
     name: p.name,
     price: p.price,
     stock: p.stock,
+    imageUrl: p.imageUrl,
+    category: p.category,
     variants: p.variants.map((v) => ({ id: v.id, color: v.color, size: v.size, stock: v.stock })),
   }));
 
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-4xl">
       <h1 className="mb-1 text-2xl font-bold text-gray-900">Registrar venta</h1>
       <p className="mb-6 text-sm text-gray-500">
         Para ventas hechas en persona (mostrador), así se descuenta el stock correctamente.
